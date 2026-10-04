@@ -1,0 +1,13 @@
+# Oengo Web Storefront Developer & AI Agent Rules
+# MANDATORY FOR ALL AI AGENTS & DEVELOPERS
+
+## Core Principles
+1. ZERO-BUG & BUILD PASSING MANDATE:
+   - Always run `npm run build` (`next build`) before any commit.
+   - Zero compilation errors and zero build warnings allowed.
+   - Pushing unverified or failing code to `main` is strictly forbidden.
+
+2. SECURITY & WALLET SAFETY:
+   - Never hardcode private keys or secrets in the client application.
+   - Ensure all transaction signing flows request explicit user confirmation.
+   - See `DEVELOPER_AND_AI_RULES.md` for complete enforcement policies.
