@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 interface WalletData {
   digital: {
@@ -259,24 +260,35 @@ export default function Home() {
           <p className="text-sm text-slate-400 mt-1">Powered by OENEXA Layer-1 • Zero 30% Aggregator Tax • Autonomous Escrow</p>
         </div>
 
-        {/* Dual-Wallet Balance Card */}
-        {wallet && (
-          <div className="flex items-center gap-4 bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
-            {/* Digital Wallet Tier */}
-            <div className="pr-4 border-r border-slate-800">
-              <div className="text-xs uppercase font-semibold text-slate-400 tracking-wider">Digital Wallet</div>
-              <div className="text-xl font-black text-emerald-400">€{wallet.digital.fiatEUR.toFixed(2)}</div>
-              <div className="text-xs text-slate-400">⭐ {wallet.digital.loyaltyPoints} Cashback Pts</div>
-            </div>
+        {/* Header Right: Dual-Wallet & Merchant Portal Link */}
+        <div className="flex items-center gap-3">
+          {wallet && (
+            <div className="flex items-center gap-4 bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+              {/* Digital Wallet Tier */}
+              <div className="pr-4 border-r border-slate-800">
+                <div className="text-xs uppercase font-semibold text-slate-400 tracking-wider">Digital Wallet</div>
+                <div className="text-xl font-black text-emerald-400">€{wallet.digital.fiatEUR.toFixed(2)}</div>
+                <div className="text-xs text-slate-400">⭐ {wallet.digital.loyaltyPoints} Cashback Pts</div>
+              </div>
 
-            {/* Web3 Crypto Tier */}
-            <div>
-              <div className="text-xs uppercase font-semibold text-slate-400 tracking-wider">Web3 Crypto (OEN)</div>
-              <div className="text-xl font-black text-amber-400">{parseFloat(wallet.crypto.balanceOEN).toFixed(2)} OEN</div>
-              <div className="text-xs font-mono text-slate-500 truncate max-w-[130px]">{wallet.crypto.address}</div>
+              {/* Web3 Crypto Tier */}
+              <div>
+                <div className="text-xs uppercase font-semibold text-slate-400 tracking-wider">Web3 Crypto (OEN)</div>
+                <div className="text-xl font-black text-amber-400">{parseFloat(wallet.crypto.balanceOEN).toFixed(2)} OEN</div>
+                <div className="text-xs font-mono text-slate-500 truncate max-w-[130px]">{wallet.crypto.address}</div>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {/* Quick Switch to Merchant KDS Portal */}
+          <Link
+            href="/merchant"
+            className="px-4 py-3.5 rounded-2xl bg-orange-950/70 hover:bg-orange-900 border border-orange-700/60 text-orange-300 font-bold text-xs flex flex-col items-center justify-center gap-1 transition shadow-lg shadow-orange-500/5 hover:border-orange-500 cursor-pointer"
+          >
+            <span className="text-lg">👨‍🍳</span>
+            <span>Kitchen Portal</span>
+          </Link>
+        </div>
       </header>
 
       {/* Main Order Pipeline Workspace */}
