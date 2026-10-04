@@ -22,6 +22,7 @@ interface OrderData {
   deliveryFee: number;
   tip: number;
   total: number;
+  commissionPct?: number;
   pickupBarcode: string;
   deliveryPin: string;
   restaurantPayout?: number;
@@ -32,10 +33,11 @@ interface OrderData {
 export default function Home() {
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [activeOrder, setActiveOrder] = useState<OrderData | null>(null);
+  const [commissionPct, setCommissionPct] = useState<number>(5); // Default 5%
   const [loading, setLoading] = useState(false);
   const [logMessage, setLogMessage] = useState<string>("Ready to order");
 
-  // Fetch initial wallet balance
+  // Fetch initial wallet balance and current platform commission
   const fetchWallet = async () => {
     try {
       const res = await fetch("http://localhost:3001/api/wallet/user_customer");
@@ -52,9 +54,38 @@ export default function Home() {
     }
   };
 
+  const fetchCommission = async () => {
+    try {
+      const res = await fetch("http://localhost:3001/api/admin/commission");
+      if (res.ok) {
+        const data = await res.json();
+        if (typeof data.commissionPct === "number") {
+          setCommissionPct(data.commissionPct);
+        }
+      }
+    } catch {
+      // default 5%
+    }
+  };
+
   useEffect(() => {
     fetchWallet();
+    fetchCommission();
   }, []);
+
+  const handleUpdateCommission = async (rate: number) => {
+    setCommissionPct(rate);
+    try {
+      await fetch("http://localhost:3001/api/admin/commission", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ratePct: rate })
+      });
+      setLogMessage(`Platform commission set to ${rate}% (Merchant keeps ${100 - rate}%)`);
+    } catch {
+      setLogMessage(`Commission updated locally to ${rate}%`);
+    }
+  };
 
   // Step 1: Customer Places Order
   const handlePlaceOrder = async (paymentMethod: "CRYPTO_OEN" | "DIGITAL_WALLET") => {
@@ -70,6 +101,7 @@ export default function Home() {
           amount: 28.50,
           deliveryFee: 3.50,
           tip: 2.00,
+          commissionPct,
           paymentMethod,
           items: [
             { name: "Artisanal Margherita Pizza", qty: 1, price: 16.50 },
@@ -80,7 +112,7 @@ export default function Home() {
       const data = await res.json();
       if (data.success) {
         setActiveOrder(data.order);
-        setLogMessage(`Order ${data.order.id} placed! Funds locked in WASM Escrow.`);
+        setLogMessage(`Order ${data.order.id} placed with ${data.order.commissionPct ?? commissionPct}% commission! Funds locked in Escrow.`);
       }
     } catch {
       setLogMessage("Error connecting to Oengo API gateway");
@@ -154,7 +186,8 @@ export default function Home() {
       const data = await res.json();
       if (data.success) {
         setActiveOrder(data.order);
-        setLogMessage(`PIN ${activeOrder.deliveryPin} verified! Escrow settled: 95% to Restaurant, 5%+tip to Courier!`);
+        const comm = data.order.commissionPct ?? commissionPct;
+        setLogMessage(`PIN ${activeOrder.deliveryPin} verified! Escrow settled: ${100 - comm}% to Restaurant, ${comm}%+tip to Courier!`);
         fetchWallet(); // Refresh customer cashback
       }
     } catch {
@@ -236,6 +269,38 @@ export default function Home() {
             <div className="flex justify-between text-white font-bold text-base pt-2 border-t border-slate-800">
               <span>Total in Escrow</span>
               <span className="text-orange-400">€34.00</span>
+            </div>
+          </div>
+
+          {/* Configurable Platform Commission Selector */}
+          <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">Commission Setup</span>
+              <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-orange-950 text-orange-400 border border-orange-800/80">
+                {commissionPct}% {commissionPct === 5 ? "(Default)" : "(Custom)"}
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mb-3">Merchant retains {100 - commissionPct}% of food revenue vs 70% on legacy apps.</p>
+            <div className="grid grid-cols-4 gap-1.5 mb-3">
+              {[0, 3, 5, 10].map((rate) => (
+                <button
+                  key={rate}
+                  type="button"
+                  onClick={() => handleUpdateCommission(rate)}
+                  disabled={loading || !!activeOrder}
+                  className={`py-1.5 px-2 rounded-lg text-xs font-bold transition cursor-pointer disabled:opacity-50 ${
+                    commissionPct === rate
+                      ? "bg-orange-500 text-slate-950 font-black shadow"
+                      : "bg-slate-800 hover:bg-slate-700 text-slate-300"
+                  }`}
+                >
+                  {rate}%
+                </button>
+              ))}
+            </div>
+            <div className="text-xs text-slate-400 flex justify-between pt-2 border-t border-slate-900">
+              <span>Merchant payout est:</span>
+              <span className="text-emerald-400 font-semibold">€{(28.50 * (1 - commissionPct / 100)).toFixed(2)}</span>
             </div>
           </div>
 
@@ -337,16 +402,21 @@ export default function Home() {
               {/* Settlement Results if Delivered */}
               {activeOrder.status === "DELIVERED" && (
                 <div className="mt-6 p-4 bg-emerald-950/40 border border-emerald-800/80 rounded-2xl">
-                  <h3 className="text-sm font-bold text-emerald-400 mb-2 flex items-center gap-1.5">
-                    <span>🎉</span> On-Chain Escrow Autonomously Settled!
-                  </h3>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-bold text-emerald-400 flex items-center gap-1.5">
+                      <span>🎉</span> On-Chain Escrow Autonomously Settled!
+                    </h3>
+                    <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-emerald-900/60 text-emerald-300 border border-emerald-700/60">
+                      Rate: {activeOrder.commissionPct ?? commissionPct}%
+                    </span>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                     <div className="p-2.5 bg-slate-900/80 rounded-lg">
-                      <div className="text-slate-400">Restaurant Payout (95%)</div>
+                      <div className="text-slate-400">Restaurant ({100 - (activeOrder.commissionPct ?? commissionPct)}%)</div>
                       <div className="text-base font-bold text-emerald-300">€{activeOrder.restaurantPayout?.toFixed(2)}</div>
                     </div>
                     <div className="p-2.5 bg-slate-900/80 rounded-lg">
-                      <div className="text-slate-400">Courier Payout (5% + Tip)</div>
+                      <div className="text-slate-400">Courier ({activeOrder.commissionPct ?? commissionPct}% + Tip)</div>
                       <div className="text-base font-bold text-amber-300">€{activeOrder.courierPayout?.toFixed(2)}</div>
                     </div>
                     <div className="p-2.5 bg-slate-900/80 rounded-lg">
