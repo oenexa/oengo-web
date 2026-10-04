@@ -1,18 +1,19 @@
-# OenGo: Architecture & Modular Design System
+# OenGo Web: Frontend Modular Design System & SRP Standards 🍱
 
-> **Document Status**: Production Architecture Standard  
-> **Target Audience**: Human Software Engineers & Autonomous AI Coding Agents  
+> **Repository**: `oengo-web`  
+> **Status**: Production Architecture Standard  
+> **Target Audience**: Human Engineers & Autonomous AI Coding Agents  
+> **Framework**: Next.js 16 (Turbopack) / React 19 / TypeScript  
 > **Last Updated**: 2026-10-04  
-> **Scope**: `oengo-web` (Frontend), `oengo-api` (Commerce Gateway), and `oenexa-node` (L1 Blockchain)
 
 ---
 
 ## 1. Architectural Philosophy & Principles
 
 ### 1.1 Single Responsibility Principle (SRP)
-Every module, file, and React component must have **one, and only one**, reason to change. 
+Every component, utility, and type file in `oengo-web` must have **one, and only one**, reason to change.
 - **Anti-Pattern**: Putting 800+ lines of state management, API calls, SVG maps, forms, modals, and checkout math into a single `page.tsx`.
-- **Approved Pattern**: Modular components with focused scopes (<150 lines average), strictly typed input props, and isolated responsibilities.
+- **Enforced Pattern**: Modular components with focused scopes (<150 lines average), strictly typed input props, and isolated responsibilities.
 
 ### 1.2 Container / Presentational Separation
 - **Page Orchestrators (`src/app/**/page.tsx`)**: Act strictly as coordinators. They fetch initial data, hold high-level screen states (active tabs, selected restaurant, cart state), and compose presentational subcomponents.
@@ -130,9 +131,9 @@ oengo-web/
 
 ---
 
-## 4. Developer & AI Agent Guidelines
+## 4. Frontend Developer & AI Agent Guidelines
 
-Future engineers and autonomous AI agents working in this repository **must** strictly adhere to the following rules:
+Future engineers and autonomous AI agents working in `oengo-web` **must** strictly adhere to the following rules:
 
 ### Rule 1: No Monolithic Files
 - **Maximum file size limit**: 300 lines of code for components; 400 lines for page orchestrators.
@@ -141,7 +142,6 @@ Future engineers and autonomous AI agents working in this repository **must** st
 ### Rule 2: Strict Typing & Shared Contracts
 - Never use `any` in component props or API calls.
 - All new models must be added to `src/types/<category>.ts` and re-exported in `src/types/index.ts`.
-- Ensure frontend types match backend response schemas in `oengo-api/server.js`.
 
 ### Rule 3: Network Centralization
 - Never invoke `fetch('http://localhost:3001/...')` directly inside a component.
@@ -149,6 +149,4 @@ Future engineers and autonomous AI agents working in this repository **must** st
 
 ### Rule 4: Zero-Bug Quality Gate
 Before submitting any pull request or committing code:
-1. `oengo-web`: Execute `npm run build` — must finish with exit code 0 and zero TypeScript errors.
-2. `oengo-api`: Execute `npm test` — all test suites must pass (15/15 passing).
-3. `oenexa-node`: Execute `go test ./...` — must finish with exit code 0.
+- Execute `npm run build` — must finish with exit code 0 and zero TypeScript errors.
