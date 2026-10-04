@@ -2,14 +2,14 @@
 # Oengo Web Storefront Dockerfile (Next.js 14 Standalone Production)
 # ─────────────────────────────────────────────────────────────────────────────
 # Stage 1: Install dependencies
-FROM node:24-alpine AS deps
+FROM node:24.21.0-alpine AS deps
 WORKDIR /app
 
 COPY package*.json ./
 RUN npm ci
 
 # Stage 2: Build the Next.js app
-FROM node:24-alpine AS builder
+FROM node:24.21.0-alpine AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
@@ -19,7 +19,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 # Stage 3: Minimal production runner
-FROM node:24-alpine AS runner
+FROM node:24.21.0-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
