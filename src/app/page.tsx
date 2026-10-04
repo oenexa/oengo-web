@@ -23,6 +23,12 @@ interface OrderData {
   tip: number;
   total: number;
   commissionPct?: number;
+  paymentMethod?: string;
+  cardPayment?: {
+    brand: string;
+    last4: string;
+    transactionId: string;
+  } | null;
   pickupBarcode: string;
   deliveryPin: string;
   restaurantPayout?: number;
@@ -30,10 +36,18 @@ interface OrderData {
   escrowLocked: boolean;
 }
 
+type PaymentMethodOption = "CREDIT_CARD" | "DIGITAL_WALLET" | "CRYPTO_OEN";
+
 export default function Home() {
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [activeOrder, setActiveOrder] = useState<OrderData | null>(null);
   const [commissionPct, setCommissionPct] = useState<number>(5); // Default 5%
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethodOption>("CREDIT_CARD");
+  const [cardNumber, setCardNumber] = useState<string>("4242 4242 4242 4242");
+  const [cardHolder, setCardHolder] = useState<string>("Alice Customer");
+  const [cardExp, setCardExp] = useState<string>("12/28");
+  const [cardCvc, setCardCvc] = useState<string>("888");
+  const [saveCard, setSaveCard] = useState<boolean>(true);
   const [loading, setLoading] = useState(false);
   const [logMessage, setLogMessage] = useState<string>("Ready to order");
 
@@ -88,10 +102,37 @@ export default function Home() {
   };
 
   // Step 1: Customer Places Order
-  const handlePlaceOrder = async (paymentMethod: "CRYPTO_OEN" | "DIGITAL_WALLET") => {
+  const handlePlaceOrder = async (method: PaymentMethodOption = selectedMethod) => {
     setLoading(true);
-    setLogMessage("Submitting order to smart contract escrow...");
+    setLogMessage("Authorizing payment and securing order in escrow...");
     try {
+      let cardPaymentData = null;
+
+      if (method === "CREDIT_CARD") {
+        setLogMessage("Processing instant credit card authorization...");
+        const cardRes = await fetch("http://localhost:3001/api/payments/confirm-card", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            cardNumber,
+            cardHolderName: cardHolder,
+            cardExpMonth: cardExp.split("/")[0] || "12",
+            cardExpYear: cardExp.split("/")[1] ? `20${cardExp.split("/")[1]}` : "2028",
+            cardCvc,
+            saveCard
+          })
+        });
+        const cardJson = await cardRes.json();
+        if (!cardRes.ok || !cardJson.success) {
+          throw new Error(cardJson.error || "Credit card authorization failed");
+        }
+        cardPaymentData = {
+          transactionId: cardJson.transactionId,
+          brand: cardJson.brand,
+          last4: cardJson.last4
+        };
+      }
+
       const res = await fetch("http://localhost:3001/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -102,7 +143,8 @@ export default function Home() {
           deliveryFee: 3.50,
           tip: 2.00,
           commissionPct,
-          paymentMethod,
+          paymentMethod: method,
+          cardPayment: cardPaymentData,
           items: [
             { name: "Artisanal Margherita Pizza", qty: 1, price: 16.50 },
             { name: "Truffle Arancini", qty: 1, price: 12.00 }
@@ -112,10 +154,16 @@ export default function Home() {
       const data = await res.json();
       if (data.success) {
         setActiveOrder(data.order);
-        setLogMessage(`Order ${data.order.id} placed with ${data.order.commissionPct ?? commissionPct}% commission! Funds locked in Escrow.`);
+        const label = method === "CREDIT_CARD" && cardPaymentData
+          ? `Credit Card (${cardPaymentData.brand} •••• ${cardPaymentData.last4})`
+          : method;
+        setLogMessage(`Order ${data.order.id} paid instantly via ${label}! Locked in Escrow.`);
+      } else {
+        setLogMessage(data.error || "Failed to create order");
       }
-    } catch {
-      setLogMessage("Error connecting to Oengo API gateway");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Error connecting to Oengo API gateway";
+      setLogMessage(msg);
     } finally {
       setLoading(false);
     }
@@ -304,22 +352,227 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Checkout Buttons */}
-          <div className="space-y-3">
-            <button
-              onClick={() => handlePlaceOrder("CRYPTO_OEN")}
-              disabled={loading || !!activeOrder}
-              className="w-full py-3.5 px-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 font-black rounded-xl transition duration-200 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/10 cursor-pointer"
-            >
-              <span>⚡ Pay with Web3 Crypto (OEN)</span>
-            </button>
-            <button
-              onClick={() => handlePlaceOrder("DIGITAL_WALLET")}
-              disabled={loading || !!activeOrder}
-              className="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm rounded-xl transition disabled:opacity-50 cursor-pointer"
-            >
-              Pay with Digital Wallet Balance
-            </button>
+          {/* Tri-Rail Payment Gateway Selector */}
+          <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 mb-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">Payment Rail</span>
+              <span className="text-[11px] font-semibold text-emerald-400 flex items-center gap-1">
+                <span>🔒</span> Instant Escrow
+              </span>
+            </div>
+
+            {/* Tri-Rail Tabs */}
+            <div className="grid grid-cols-3 gap-1 p-1 bg-slate-900 rounded-xl mb-4 border border-slate-800">
+              <button
+                type="button"
+                onClick={() => setSelectedMethod("CREDIT_CARD")}
+                disabled={loading || !!activeOrder}
+                className={`py-2 px-1 text-xs font-bold rounded-lg transition cursor-pointer flex flex-col items-center gap-0.5 ${
+                  selectedMethod === "CREDIT_CARD"
+                    ? "bg-slate-800 text-orange-400 shadow border border-slate-700"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                <span>💳 Card</span>
+                <span className="text-[10px] font-normal text-slate-500">Instant</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedMethod("DIGITAL_WALLET")}
+                disabled={loading || !!activeOrder}
+                className={`py-2 px-1 text-xs font-bold rounded-lg transition cursor-pointer flex flex-col items-center gap-0.5 ${
+                  selectedMethod === "DIGITAL_WALLET"
+                    ? "bg-slate-800 text-orange-400 shadow border border-slate-700"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                <span>👛 Wallet</span>
+                <span className="text-[10px] font-normal text-slate-500">Fiat</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedMethod("CRYPTO_OEN")}
+                disabled={loading || !!activeOrder}
+                className={`py-2 px-1 text-xs font-bold rounded-lg transition cursor-pointer flex flex-col items-center gap-0.5 ${
+                  selectedMethod === "CRYPTO_OEN"
+                    ? "bg-slate-800 text-orange-400 shadow border border-slate-700"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                <span>⚡ Crypto</span>
+                <span className="text-[10px] font-normal text-slate-500">Layer-1</span>
+              </button>
+            </div>
+
+            {/* Rail 1: Credit Card Form */}
+            {selectedMethod === "CREDIT_CARD" && (
+              <div className="space-y-3 pt-1">
+                {/* Preset Card Quick-Fill */}
+                <div className="flex items-center justify-between text-[11px] text-slate-400">
+                  <span>Quick Test Cards:</span>
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCardNumber("4242 4242 4242 4242");
+                        setCardCvc("888");
+                      }}
+                      className="px-1.5 py-0.5 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 font-mono text-[10px] cursor-pointer"
+                    >
+                      Visa
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCardNumber("5555 5555 5555 4444");
+                        setCardCvc("777");
+                      }}
+                      className="px-1.5 py-0.5 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 font-mono text-[10px] cursor-pointer"
+                    >
+                      Mastercard
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCardNumber("3782 822463 10005");
+                        setCardCvc("1234");
+                      }}
+                      className="px-1.5 py-0.5 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 font-mono text-[10px] cursor-pointer"
+                    >
+                      Amex
+                    </button>
+                  </div>
+                </div>
+
+                {/* Card Number Input */}
+                <div>
+                  <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+                    <span>Card Number</span>
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-900 text-orange-400 border border-slate-800">
+                      {cardNumber.startsWith("4") ? "VISA" : cardNumber.startsWith("5") ? "MASTERCARD" : cardNumber.startsWith("3") ? "AMEX" : "CARD"}
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    value={cardNumber}
+                    onChange={(e) => setCardNumber(e.target.value)}
+                    disabled={loading || !!activeOrder}
+                    placeholder="4242 4242 4242 4242"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm font-mono text-white focus:outline-none focus:border-orange-500 transition"
+                  />
+                </div>
+
+                {/* Cardholder Name */}
+                <div>
+                  <div className="text-xs text-slate-400 mb-1">Cardholder Name</div>
+                  <input
+                    type="text"
+                    value={cardHolder}
+                    onChange={(e) => setCardHolder(e.target.value)}
+                    disabled={loading || !!activeOrder}
+                    placeholder="Alice Customer"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-orange-500 transition"
+                  />
+                </div>
+
+                {/* Expiry & CVC */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <div className="text-xs text-slate-400 mb-1">Expires (MM/YY)</div>
+                    <input
+                      type="text"
+                      value={cardExp}
+                      onChange={(e) => setCardExp(e.target.value)}
+                      disabled={loading || !!activeOrder}
+                      placeholder="12/28"
+                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm font-mono text-white focus:outline-none focus:border-orange-500 transition"
+                    />
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-400 mb-1">CVC / CVV</div>
+                    <input
+                      type="password"
+                      maxLength={4}
+                      value={cardCvc}
+                      onChange={(e) => setCardCvc(e.target.value)}
+                      disabled={loading || !!activeOrder}
+                      placeholder="888"
+                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm font-mono text-white focus:outline-none focus:border-orange-500 transition"
+                    />
+                  </div>
+                </div>
+
+                {/* Save card checkbox */}
+                <label className="flex items-center gap-2 pt-1 text-xs text-slate-400 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={saveCard}
+                    onChange={(e) => setSaveCard(e.target.checked)}
+                    disabled={loading || !!activeOrder}
+                    className="rounded bg-slate-900 border-slate-700 text-orange-500 focus:ring-orange-500"
+                  />
+                  <span>Save tokenized card securely for 1-click reorder</span>
+                </label>
+
+                {/* Action button */}
+                <button
+                  type="button"
+                  onClick={() => handlePlaceOrder("CREDIT_CARD")}
+                  disabled={loading || !!activeOrder}
+                  className="w-full mt-2 py-3 px-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 font-black rounded-xl transition duration-200 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/10 cursor-pointer"
+                >
+                  <span>💳 Pay €34.00 Instantly</span>
+                </button>
+              </div>
+            )}
+
+            {/* Rail 2: Digital Wallet */}
+            {selectedMethod === "DIGITAL_WALLET" && (
+              <div className="space-y-3 pt-2">
+                <div className="p-3 bg-slate-900 rounded-xl border border-slate-800 text-xs space-y-1">
+                  <div className="text-slate-400 flex justify-between">
+                    <span>Available Balance:</span>
+                    <span className="text-white font-bold">€{wallet?.digital.fiatEUR.toFixed(2) ?? "50.00"} EUR</span>
+                  </div>
+                  <div className="text-slate-400 flex justify-between">
+                    <span>Loyalty Points:</span>
+                    <span className="text-orange-400 font-bold">{wallet?.digital.loyaltyPoints ?? 120} pts</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handlePlaceOrder("DIGITAL_WALLET")}
+                  disabled={loading || !!activeOrder}
+                  className="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold text-sm rounded-xl transition disabled:opacity-50 cursor-pointer border border-slate-700"
+                >
+                  Pay €34.00 from Wallet Balance
+                </button>
+              </div>
+            )}
+
+            {/* Rail 3: Crypto OEN */}
+            {selectedMethod === "CRYPTO_OEN" && (
+              <div className="space-y-3 pt-2">
+                <div className="p-3 bg-slate-900 rounded-xl border border-slate-800 text-xs space-y-1">
+                  <div className="text-slate-400 flex justify-between">
+                    <span>L1 Account:</span>
+                    <span className="text-white font-mono text-[10px]">0xAlice_MLDSA65</span>
+                  </div>
+                  <div className="text-slate-400 flex justify-between">
+                    <span>OEN Balance:</span>
+                    <span className="text-orange-400 font-bold font-mono">{wallet?.crypto.balanceOEN ?? "100.00"} OEN</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handlePlaceOrder("CRYPTO_OEN")}
+                  disabled={loading || !!activeOrder}
+                  className="w-full py-3.5 px-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 font-black rounded-xl transition duration-200 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/10 cursor-pointer"
+                >
+                  <span>⚡ Pay 2.50 OEN via Layer-1 Escrow</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -333,6 +586,27 @@ export default function Home() {
                 <div>
                   <span className="text-xs font-mono text-slate-500">Order ID</span>
                   <div className="text-xl font-black text-white">{activeOrder.id}</div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-xs px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 font-mono flex items-center gap-1.5 border border-slate-700">
+                      {activeOrder.paymentMethod === "CREDIT_CARD" ? (
+                        <>
+                          <span>💳</span>
+                          <span>Instant Card: <strong className="text-white">{activeOrder.cardPayment?.brand || "Visa"} •••• {activeOrder.cardPayment?.last4 || "4242"}</strong></span>
+                          <span className="text-emerald-400 font-semibold text-[10px] ml-1 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800/80">AUTHENTICATED</span>
+                        </>
+                      ) : activeOrder.paymentMethod === "DIGITAL_WALLET" ? (
+                        <>
+                          <span>👛</span>
+                          <span>Digital Wallet (Fiat Escrow Locked)</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>⚡</span>
+                          <span>Web3 OENEXA L1 (WASM Escrow Locked)</span>
+                        </>
+                      )}
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="relative flex h-3 w-3">
