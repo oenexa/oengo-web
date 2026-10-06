@@ -7,7 +7,8 @@ import {
   MenuItem, 
   CartItem, 
   OrderData, 
-  PaymentMethodOption 
+  PaymentMethodOption,
+  CustomizationChoice 
 } from "@/types";
 import { 
   getWallet, 
@@ -27,6 +28,8 @@ import { CuisineFilter } from "@/components/customer/CuisineFilter";
 import { RestaurantDirectory } from "@/components/customer/RestaurantDirectory";
 import { MenuCatalog } from "@/components/customer/MenuCatalog";
 import { CartDrawer } from "@/components/customer/CartDrawer";
+import { DishCustomizationModal } from "@/components/customer/DishCustomizationModal";
+import { CustomerProfileDrawer } from "@/components/customer/CustomerProfileDrawer";
 import { ActiveOrderTrackingView } from "@/components/tracking/ActiveOrderTrackingView";
 import { DEFAULT_DELIVERY_ADDRESS } from "@/lib/constants";
 
@@ -61,6 +64,10 @@ export default function Home() {
   const [activeOrder, setActiveOrder] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [logMessage, setLogMessage] = useState<string>("Ready to explore restaurants");
+
+  // State: Modals & Portals
+  const [customizingDish, setCustomizingDish] = useState<MenuItem | null>(null);
+  const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
 
   // Load initial context
   const refreshWallet = useCallback(async () => {
@@ -129,21 +136,36 @@ export default function Home() {
 
   // Cart Operations
   const handleAddToCart = (item: MenuItem) => {
+    if (item.customizations && item.customizations.length > 0) {
+      setCustomizingDish(item);
+      return;
+    }
     setCart(prev => {
-      const existing = prev.find(c => c.item.id === item.id);
+      const existing = prev.find(c => c.item.id === item.id && (!c.customizations || c.customizations.length === 0));
       if (existing) {
-        return prev.map(c => (c.item.id === item.id ? { ...c, qty: c.qty + 1 } : c));
+        return prev.map(c => (c === existing ? { ...c, qty: c.qty + 1 } : c));
       }
       return [...prev, { item, qty: 1 }];
     });
     setLogMessage(`Added "${item.name}" to cart`);
   };
 
-  const handleUpdateQty = (itemId: string, delta: number) => {
+  const handleAddToCartWithCustomizations = (item: MenuItem, qty: number, choices: CustomizationChoice[]) => {
+    const extrasTotal = choices.reduce((sum, c) => sum + c.extraEUR, 0);
+    const adjustedItem: MenuItem = {
+      ...item,
+      priceEUR: parseFloat((item.priceEUR + extrasTotal).toFixed(2)),
+    };
+    setCart(prev => [...prev, { item: adjustedItem, qty, customizations: choices }]);
+    const desc = choices.length > 0 ? ` (${choices.map(c => c.optionName).join(", ")})` : "";
+    setLogMessage(`Added ${qty}x "${item.name}"${desc} to cart`);
+  };
+
+  const handleUpdateQty = (index: number, delta: number) => {
     setCart(prev =>
       prev
-        .map(c => {
-          if (c.item.id === itemId) {
+        .map((c, i) => {
+          if (i === index) {
             const nextQty = c.qty + delta;
             return nextQty > 0 ? { ...c, qty: nextQty } : null;
           }
@@ -204,7 +226,9 @@ export default function Home() {
         paymentMethod: method,
         cardPayment: cardPaymentData,
         items: cart.map(c => ({
-          name: c.item.name,
+          name: c.customizations && c.customizations.length > 0
+            ? `${c.item.name} (${c.customizations.map(x => x.optionName).join(", ")})`
+            : c.item.name,
           qty: c.qty,
           price: c.item.priceEUR
         }))
@@ -292,6 +316,7 @@ export default function Home() {
           setIsEditingAddress(false);
         }}
         onAddressChange={setDeliveryAddress}
+        onOpenProfile={() => setIsProfileOpen(true)}
       />
 
       {/* 2. Main Content Area */}
@@ -331,6 +356,7 @@ export default function Home() {
                 restaurant={selectedRestaurant}
                 menuItems={menuItems}
                 onAddToCart={handleAddToCart}
+                onCustomize={dish => setCustomizingDish(dish)}
               />
             </div>
 
@@ -368,6 +394,19 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* 3. Modal Dialogs */}
+      <DishCustomizationModal
+        item={customizingDish}
+        isOpen={!!customizingDish}
+        onClose={() => setCustomizingDish(null)}
+        onAddToCart={handleAddToCartWithCustomizations}
+      />
+
+      <CustomerProfileDrawer
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+      />
     </div>
   );
 }

@@ -1,17 +1,21 @@
 import { CardPaymentData } from "./payment";
+import { CustomizationChoice } from "./menu";
 
-export type OrderStatus = 
-  | "AWAITING_RESTAURANT" 
-  | "PREPARING" 
-  | "READY_FOR_PICKUP" 
-  | "IN_TRANSIT" 
-  | "DELIVERED" 
-  | "CANCELLED_BY_RESTAURANT";
+export type OrderStatus =
+  | "AWAITING_RESTAURANT"
+  | "PREPARING"
+  | "READY_FOR_PICKUP"
+  | "IN_TRANSIT"
+  | "DELIVERED"
+  | "CANCELLED_BY_RESTAURANT"
+  | "REFUNDED";
 
 export interface OrderItem {
+  id?: string;
   name: string;
   qty: number;
   price: number;
+  customizations?: CustomizationChoice[];
 }
 
 export interface OrderData {
@@ -24,6 +28,7 @@ export interface OrderData {
   amount: number;
   deliveryFee: number;
   tip: number;
+  discountEUR?: number;
   total: number;
   commissionPct: number;
   paymentMethod?: string;

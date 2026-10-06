@@ -1,4 +1,14 @@
-export type PaymentMethodOption = "CREDIT_CARD" | "DIGITAL_WALLET" | "CRYPTO_OEN";
+export type PaymentMethodOption =
+  | "CREDIT_CARD"
+  | "DEBIT_CARD"
+  | "DIGITAL_WALLET"
+  | "OENGO_COIN"
+  | "MIXED_WALLET_COIN"
+  | "INSTANT_PAY"
+  | "APPLE_PAY"
+  | "GOOGLE_PAY"
+  | "BANK_TRANSFER"
+  | "CRYPTO_OEN";
 
 export interface CardPaymentData {
   transactionId: string;

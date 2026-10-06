@@ -6,12 +6,14 @@ interface MenuCatalogProps {
   restaurant: Restaurant | null;
   menuItems: MenuItem[];
   onAddToCart: (dish: MenuItem) => void;
+  onCustomize?: (dish: MenuItem) => void;
 }
 
 export function MenuCatalog({
   restaurant,
   menuItems,
-  onAddToCart
+  onAddToCart,
+  onCustomize
 }: MenuCatalogProps) {
   if (!restaurant) {
     return (
@@ -35,6 +37,7 @@ export function MenuCatalog({
             key={dish.id}
             dish={dish}
             onAddToCart={onAddToCart}
+            onCustomize={onCustomize}
           />
         ))}
       </div>

@@ -5,7 +5,7 @@ import { TriRailPaymentSelector } from "../checkout/TriRailPaymentSelector";
 
 interface CartDrawerProps {
   cart: CartItem[];
-  onUpdateQty: (itemId: string, delta: number) => void;
+  onUpdateQty: (index: number, delta: number) => void;
   foodSubtotal: number;
   deliveryFee: number;
   tipEUR: number;
@@ -81,28 +81,38 @@ export function CartDrawer({
         </div>
       ) : (
         <div className="space-y-3 mb-6">
-          {cart.map(c => (
+          {cart.map((c, idx) => (
             <div
-              key={c.item.id}
+              key={`${c.item.id}-${idx}`}
               className="p-3 bg-slate-950/70 rounded-xl border border-slate-800 flex items-center justify-between"
             >
-              <div className="pr-2">
+              <div className="pr-2 flex-1">
                 <div className="text-xs font-bold text-white line-clamp-1">{c.item.name}</div>
-                <div className="text-[11px] text-emerald-400 font-mono">
+                {c.customizations && c.customizations.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {c.customizations.map((cust, i) => (
+                      <span key={i} className="text-[10px] bg-slate-900 border border-slate-800 text-slate-400 px-1.5 py-0.5 rounded">
+                        {cust.optionName}
+                        {cust.extraEUR > 0 ? ` (+${formatEUR(cust.extraEUR)})` : ""}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <div className="text-[11px] text-emerald-400 font-mono mt-1">
                   {formatEUR(c.item.priceEUR * c.qty)}
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => onUpdateQty(c.item.id, -1)}
+                  onClick={() => onUpdateQty(idx, -1)}
                   className="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center cursor-pointer"
                 >
                   -
                 </button>
                 <span className="text-xs font-mono font-bold text-white">{c.qty}</span>
                 <button
-                  onClick={() => onUpdateQty(c.item.id, 1)}
+                  onClick={() => onUpdateQty(idx, 1)}
                   className="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center cursor-pointer"
                 >
                   +

@@ -4,9 +4,12 @@ import { formatEUR } from "@/lib/utils";
 interface DishCardProps {
   dish: MenuItem;
   onAddToCart: (dish: MenuItem) => void;
+  onCustomize?: (dish: MenuItem) => void;
 }
 
-export function DishCard({ dish, onAddToCart }: DishCardProps) {
+export function DishCard({ dish, onAddToCart, onCustomize }: DishCardProps) {
+  const hasCustomizations = dish.customizations && dish.customizations.length > 0;
+
   return (
     <div className="p-4 bg-slate-950/70 border border-slate-800/90 rounded-2xl flex flex-col justify-between hover:border-slate-700 transition">
       <div>
@@ -19,6 +22,11 @@ export function DishCard({ dish, onAddToCart }: DishCardProps) {
           )}
         </div>
         <p className="text-xs text-slate-400 line-clamp-2">{dish.description}</p>
+        {dish.calories && (
+          <div className="text-[10px] text-slate-500 mt-1">
+            {dish.calories} kcal • ~{dish.prepMinutes || 15} mins prep
+          </div>
+        )}
       </div>
 
       <div className="mt-4 pt-3 border-t border-slate-900 flex items-center justify-between">
@@ -27,13 +35,31 @@ export function DishCard({ dish, onAddToCart }: DishCardProps) {
           <span className="text-[10px] text-slate-500 font-mono ml-1.5">{dish.priceOEN} OEN</span>
         </div>
 
-        <button
-          onClick={() => onAddToCart(dish)}
-          disabled={!dish.inStock}
-          className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-slate-950 font-black rounded-xl text-xs transition cursor-pointer shadow-md"
-        >
-          {dish.inStock ? "Add +" : "Sold Out"}
-        </button>
+        <div className="flex items-center gap-1.5">
+          {dish.inStock && onCustomize && (
+            <button
+              onClick={() => onCustomize(dish)}
+              className="px-2 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white font-bold rounded-xl text-xs transition cursor-pointer"
+              title="Customize options (bread, size, extras)"
+            >
+              ⚙️
+            </button>
+          )}
+
+          <button
+            onClick={() => {
+              if (hasCustomizations && onCustomize) {
+                onCustomize(dish);
+              } else {
+                onAddToCart(dish);
+              }
+            }}
+            disabled={!dish.inStock}
+            className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-slate-950 font-black rounded-xl text-xs transition cursor-pointer shadow-md"
+          >
+            {dish.inStock ? (hasCustomizations ? "Customize +" : "Add +") : "Sold Out"}
+          </button>
+        </div>
       </div>
     </div>
   );

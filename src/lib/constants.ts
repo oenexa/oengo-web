@@ -1,4 +1,6 @@
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001").replace(/\/+$/, "").endsWith("/api")
+  ? (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001").replace(/\/+$/, "")
+  : `${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001").replace(/\/+$/, "")}/api`;
 
 export const OEN_EUR_EXCHANGE_RATE = 13.60;
 

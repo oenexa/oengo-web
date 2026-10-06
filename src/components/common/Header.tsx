@@ -9,6 +9,7 @@ interface HeaderProps {
   onToggleEditAddress: () => void;
   onSaveAddress: (address: string) => void;
   onAddressChange: (address: string) => void;
+  onOpenProfile?: () => void;
 }
 
 export function Header({
@@ -17,7 +18,8 @@ export function Header({
   isEditingAddress,
   onToggleEditAddress,
   onSaveAddress,
-  onAddressChange
+  onAddressChange,
+  onOpenProfile
 }: HeaderProps) {
   return (
     <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between border-b border-slate-800 pb-6 mb-8 gap-4">
@@ -61,16 +63,42 @@ export function Header({
         </div>
       </div>
 
-      {/* Header Right: Wallet & Merchant Switcher */}
-      <div className="flex items-center gap-3 flex-wrap">
+      {/* Header Right: Portals & Navigation */}
+      <div className="flex items-center gap-2 flex-wrap">
         <WalletBadge wallet={wallet} />
+
+        {onOpenProfile && (
+          <button
+            onClick={onOpenProfile}
+            className="px-3 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
+          >
+            <span>👤</span>
+            <span>Profile</span>
+          </button>
+        )}
 
         <Link
           href="/merchant"
-          className="px-4 py-3 rounded-2xl bg-orange-950/70 hover:bg-orange-900 border border-orange-700/60 text-orange-300 font-bold text-xs flex items-center gap-2 transition shadow-lg shadow-orange-500/5 hover:border-orange-500 cursor-pointer"
+          className="px-3 py-2.5 rounded-2xl bg-orange-950/70 hover:bg-orange-900 border border-orange-700/60 text-orange-300 font-bold text-xs flex items-center gap-1.5 transition shadow-lg shadow-orange-500/5 hover:border-orange-500 cursor-pointer"
         >
           <span>👨‍🍳</span>
-          <span>Kitchen Portal (KDS) &rarr;</span>
+          <span>Kitchen (KDS)</span>
+        </Link>
+
+        <Link
+          href="/rider"
+          className="px-3 py-2.5 rounded-2xl bg-cyan-950/70 hover:bg-cyan-900 border border-cyan-700/60 text-cyan-300 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
+        >
+          <span>🚴</span>
+          <span>Rider App</span>
+        </Link>
+
+        <Link
+          href="/admin"
+          className="px-3 py-2.5 rounded-2xl bg-purple-950/70 hover:bg-purple-900 border border-purple-700/60 text-purple-300 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
+        >
+          <span>⚡</span>
+          <span>Admin</span>
         </Link>
       </div>
     </header>

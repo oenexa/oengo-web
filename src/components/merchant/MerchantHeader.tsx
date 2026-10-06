@@ -64,10 +64,23 @@ export function MerchantHeader({
 
         <Link
           href="/"
-          className="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 font-black rounded-xl text-xs transition flex items-center gap-1.5 shadow-lg shadow-orange-500/10 cursor-pointer"
+          className="px-3.5 py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 font-black rounded-xl text-xs transition flex items-center gap-1.5 shadow-lg shadow-orange-500/10 cursor-pointer"
         >
-          <span>🍔 Customer App</span>
-          <span>&rarr;</span>
+          <span>🍔 Storefront</span>
+        </Link>
+
+        <Link
+          href="/rider"
+          className="px-3 py-1.5 rounded-xl bg-cyan-950/70 hover:bg-cyan-900 border border-cyan-700/60 text-cyan-300 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
+        >
+          <span>🚴 Rider</span>
+        </Link>
+
+        <Link
+          href="/admin"
+          className="px-3 py-1.5 rounded-xl bg-purple-950/70 hover:bg-purple-900 border border-purple-700/60 text-purple-300 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
+        >
+          <span>⚡ Admin</span>
         </Link>
       </div>
     </header>
