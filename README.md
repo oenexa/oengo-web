@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🍔 OENGO-WEB — Enterprise Frontend UI Portal
 
-## Getting Started
+The official, pure frontend web application for the **OENGO** on-demand delivery ecosystem, built with Next.js 16 (App Router), React 19, and Tailwind CSS v4.
 
-First, run the development server:
+---
 
+## 🏛️ Architecture & Separation of Concerns
+
+* **Pure Frontend Mandate**: Omnichannel UI for Customers, Restaurant Merchants, Couriers, and Administrators. Zero direct database queries or private financial key operations.
+* **Backend Companion**: Connects to the backend REST & WebSocket API at [`oengo-api`](../oengo-api) via `NEXT_PUBLIC_API_URL` (default: `http://localhost:3001`).
+
+For in-depth architectural patterns, directory standards, and developer instructions, see **[FRONTEND_ARCHITECTURE.md](./FRONTEND_ARCHITECTURE.md)**.
+
+---
+
+## 📱 Portals & Routes
+
+1. **Customer Marketplace (`/`)**: Multi-restaurant discovery, dish modifier customization, sticky cart, tri-rail checkout (Card, Digital Wallet, Web3 Crypto), and live vector map order tracking with doorstep PIN verification.
+2. **Kitchen Display System (`/merchant`)**: Operational controls (Open/Closed), live menu catalog manager (In Stock / Sold Out toggle), real-time ticket queue with audio chimes, and courier counter pickup barcode station.
+3. **Delivery Partner Hub (`/rider`)**: Online/Offline toggle, proximity dispatch acceptance, camera barcode scanner, and doorstep PIN completion.
+4. **Platform Administration (`/admin`)**: Merchant approvals, commission overrides (0%–30%), and transaction dispute overview.
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 24.21.0+ (LTS)
+- Running instance of `oengo-api` on port 3001
+
+### Local Development
 ```bash
+# Install dependencies
+npm install
+
+# Run frontend development server (Port 3000)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Verify production build & TypeScript validation
+npm run build
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

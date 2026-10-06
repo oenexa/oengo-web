@@ -1,13 +1,22 @@
-# Oengo Web Storefront Developer & AI Agent Rules
+# OENGO-WEB — Frontend Developer & AI Agent Rules
 # MANDATORY FOR ALL AI AGENTS & DEVELOPERS
 
-## Core Principles
-1. ZERO-BUG & BUILD PASSING MANDATE:
+## 1. Core Principles & Boundaries
+1. PURE FRONTEND ISOLATION:
+   - This repository is exclusively for User Interface (Customer Storefront, KDS, Rider, Admin).
+   - ZERO direct database connections, private keys, or backend ledger math permitted.
+   - All data fetching and mutations must communicate with `oengo-api` via HTTP/WebSockets.
+   - Refer to `FRONTEND_ARCHITECTURE.md` for full component and directory guidelines.
+
+2. ZERO-BUG & BUILD PASSING MANDATE:
    - Always run `npm run build` (`next build`) before any commit.
-   - Zero compilation errors and zero build warnings allowed.
+   - Zero compilation errors, zero TypeScript errors, and zero broken routes allowed.
    - Pushing unverified or failing code to `main` is strictly forbidden.
 
-2. SECURITY & WALLET SAFETY:
-   - Never hardcode private keys or secrets in the client application.
-   - Ensure all transaction signing flows request explicit user confirmation.
-   - See `DEVELOPER_AND_AI_RULES.md` for complete enforcement policies.
+3. MODULAR SINGLE RESPONSIBILITY PRINCIPLE (SRP):
+   - Keep page components concise and organized into subcomponents under `src/components/` and `src/features/`.
+   - Reusable hooks belong in `src/hooks/`; typed API requests belong in `src/services/`.
+
+4. SECURITY & CLIENT HYGIENE:
+   - Never commit API secrets or environment variables without `NEXT_PUBLIC_` prefix unless strictly server-side.
+   - Never log raw payment credentials or sensitive customer data in browser console logs.
