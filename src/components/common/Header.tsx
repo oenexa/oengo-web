@@ -78,6 +78,25 @@ export function Header({
         )}
 
         <Link
+          href="/login"
+          className="px-3 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs"
+        >
+          Login
+        </Link>
+        <Link
+          href="/register"
+          className="px-3 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs"
+        >
+          Register
+        </Link>
+        <Link
+          href="/kyc"
+          className="px-3 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs"
+        >
+          KYC
+        </Link>
+
+        <Link
           href="/merchant"
           className="px-3 py-2.5 rounded-2xl bg-orange-950/70 hover:bg-orange-900 border border-orange-700/60 text-orange-300 font-bold text-xs flex items-center gap-1.5 transition shadow-lg shadow-orange-500/5 hover:border-orange-500 cursor-pointer"
         >
