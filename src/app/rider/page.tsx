@@ -11,10 +11,10 @@ export default function RiderPortalPage() {
   const [availableJobs, setAvailableJobs] = useState<OrderData[]>([
     {
       id: "ord_job_201",
-      
+      buyerId: "user_customer",
       buyerName: "Alice Customer",
       buyerAddress: "Piazza del Plebiscito 1, Napoli",
-      
+      restaurantId: "user_restaurant",
       items: [{ name: "Artisanal Margherita Pizza", qty: 2, price: 16.50 }],
       amount: 33.00,
       deliveryFee: 3.50,

@@ -71,10 +71,10 @@ export function FleetMap() {
           <div
             key={c.id}
             className="absolute flex flex-col items-center transition-all duration-1000 ease-linear"
-            style={{ left: \`\${c.lng}%\`, top: \`\${c.lat}%\` }}
+            style={{ left: `${c.lng}%`, top: `${c.lat}%` }}
           >
             <span className="text-2xl">{c.vehicle}</span>
-            <div className={\`mt-1 px-1.5 py-0.5 rounded text-[9px] font-bold whitespace-nowrap border \${c.status === 'DELIVERING' ? 'bg-orange-950/80 text-orange-400 border-orange-800' : 'bg-emerald-950/80 text-emerald-400 border-emerald-800'}\`}>
+            <div className={`mt-1 px-1.5 py-0.5 rounded text-[9px] font-bold whitespace-nowrap border ${c.status === 'DELIVERING' ? 'bg-orange-950/80 text-orange-400 border-orange-800' : 'bg-emerald-950/80 text-emerald-400 border-emerald-800'}`}>
               {c.name}
             </div>
           </div>
