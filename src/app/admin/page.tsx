@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { formatEUR } from "@/lib/utils";
+import { FleetMap } from "@/components/admin/FleetMap";
 
 export default function AdminDashboardPage() {
   const [commissionRate, setCommissionRate] = useState(5.0);
-  const [activeTab, setActiveTab] = useState<"overview" | "ledger" | "restaurants" | "fraud">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "fleet" | "ledger" | "restaurants" | "fraud">("overview");
   const [statusMsg, setStatusMsg] = useState("");
 
   const handleUpdateCommission = (newRate: number) => {
@@ -138,6 +139,14 @@ export default function AdminDashboardPage() {
             📊 Operations Overview
           </button>
           <button
+            onClick={() => setActiveTab("fleet")}
+            className={`pb-3 transition cursor-pointer ${
+              activeTab === "fleet" ? "text-orange-400 border-b-2 border-orange-400" : "text-slate-400 hover:text-white"
+            }`}
+          >
+            🗺️ Live Courier Fleet
+          </button>
+          <button
             onClick={() => setActiveTab("ledger")}
             className={`pb-3 transition cursor-pointer ${
               activeTab === "ledger" ? "text-orange-400 border-b-2 border-orange-400" : "text-slate-400 hover:text-white"
@@ -162,6 +171,11 @@ export default function AdminDashboardPage() {
             🛡️ Fraud & Disputes
           </button>
         </div>
+
+        {/* Tab: Fleet Map */}
+        {activeTab === "fleet" && (
+          <FleetMap />
+        )}
 
         {/* Tab 2: Double-Entry Ledger Monitor */}
         {activeTab === "ledger" && (
