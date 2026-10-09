@@ -1,4 +1,13 @@
 import { API_BASE_URL } from "./constants";
+
+// ── Authentication & Auth State ─────────────────────────────────────────────
+export function getActiveUserId(fallback: string): string {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("oengo_user_id") || fallback;
+  }
+  return fallback;
+}
+
 import { 
   WalletData, 
   CoinProfile,
@@ -10,14 +19,14 @@ import {
 } from "@/types";
 
 // ── Wallet & Coin APIs ───────────────────────────────────────────────────────
-export async function getWallet(userId = "user_customer"): Promise<WalletData> {
+export async function getWallet(userId = getActiveUserId("user_customer")): Promise<WalletData> {
   const res = await fetch(`${API_BASE_URL}/wallet/${userId}`);
   if (!res.ok) throw new Error("Failed to fetch wallet");
   const data = await res.json();
   return data.wallets;
 }
 
-export async function depositWallet(userId = "user_customer", amount: number): Promise<number> {
+export async function depositWallet(userId = getActiveUserId("user_customer"), amount: number): Promise<number> {
   const res = await fetch(`${API_BASE_URL}/wallet/deposit`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -28,13 +37,13 @@ export async function depositWallet(userId = "user_customer", amount: number): P
   return data.newBalanceEUR;
 }
 
-export async function getCoinProfile(userId = "user_customer"): Promise<CoinProfile> {
+export async function getCoinProfile(userId = getActiveUserId("user_customer")): Promise<CoinProfile> {
   const res = await fetch(`${API_BASE_URL}/coins/${userId}`);
   if (!res.ok) throw new Error("Failed to fetch coins");
   return await res.json();
 }
 
-export async function redeemCoins(userId = "user_customer", coins: number, subtotal: number): Promise<number> {
+export async function redeemCoins(userId = getActiveUserId("user_customer"), coins: number, subtotal: number): Promise<number> {
   const res = await fetch(`${API_BASE_URL}/coins/redeem`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -204,7 +213,7 @@ export async function createOrder(payload: CreateOrderPayload): Promise<OrderDat
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      buyerId: payload.buyerId || "user_customer",
+      buyerId: payload.buyerId || getActiveUserId("user_customer"),
       ...payload
     })
   });
@@ -247,7 +256,7 @@ export async function declineOrder(orderId: string, reason?: string): Promise<Or
   return data.order;
 }
 
-export async function assignCourier(orderId: string, courierId = "user_courier"): Promise<OrderData> {
+export async function assignCourier(orderId: string, courierId = getActiveUserId("user_courier")): Promise<OrderData> {
   const res = await fetch(`${API_BASE_URL}/orders/${orderId}/assign-courier`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -283,14 +292,14 @@ export async function confirmDelivery(orderId: string, code: string): Promise<Or
 }
 
 // ── Rider APIs ──────────────────────────────────────────────────────────────
-export async function getRiderProfile(riderId = "user_courier"): Promise<any> {
+export async function getRiderProfile(riderId = getActiveUserId("user_courier")): Promise<any> {
   const res = await fetch(`${API_BASE_URL}/rider/profile?riderId=${riderId}`);
   if (!res.ok) throw new Error("Failed to fetch rider profile");
   const data = await res.json();
   return data.rider;
 }
 
-export async function toggleRiderStatus(riderId = "user_courier", isOnline: boolean): Promise<any> {
+export async function toggleRiderStatus(riderId = getActiveUserId("user_courier"), isOnline: boolean): Promise<any> {
   const res = await fetch(`${API_BASE_URL}/rider/status`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -301,7 +310,7 @@ export async function toggleRiderStatus(riderId = "user_courier", isOnline: bool
   return data.rider;
 }
 
-export async function getRiderJobs(riderId = "user_courier"): Promise<OrderData[]> {
+export async function getRiderJobs(riderId = getActiveUserId("user_courier")): Promise<OrderData[]> {
   const res = await fetch(`${API_BASE_URL}/rider/jobs?riderId=${riderId}`);
   if (!res.ok) throw new Error("Failed to fetch rider jobs");
   const data = await res.json();
@@ -317,7 +326,7 @@ export async function getAdminDashboard(): Promise<any> {
 }
 
 // ── Customer Profile & Recommendations ──────────────────────────────────────
-export async function getCustomerProfile(userId = "user_customer"): Promise<any> {
+export async function getCustomerProfile(userId = getActiveUserId("user_customer")): Promise<any> {
   const res = await fetch(`${API_BASE_URL}/customer/profile?userId=${userId}`);
   if (!res.ok) throw new Error("Failed to fetch profile");
   const data = await res.json();

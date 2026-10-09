@@ -217,8 +217,8 @@ export default function Home() {
       }
 
       const newOrder = await createOrder({
-        buyerId: "user_customer",
-        restaurantId: selectedRestaurant?.id || "user_restaurant",
+        buyerId: typeof window !== "undefined" ? localStorage.getItem("oengo_user_id") || "user_customer" : "user_customer",
+        restaurantId: selectedRestaurant?.id || (typeof window !== "undefined" ? localStorage.getItem("oengo_user_id") || "user_restaurant" : "user_restaurant"),
         amount: parseFloat(foodSubtotal.toFixed(2)),
         deliveryFee: parseFloat(deliveryFee.toFixed(2)),
         tip: parseFloat(tipEUR.toFixed(2)),
@@ -266,7 +266,7 @@ export default function Home() {
     if (!activeOrder) return;
     setLoading(true);
     try {
-      await assignCourier(activeOrder.id, "user_courier");
+      await assignCourier(activeOrder.id, typeof window !== "undefined" ? localStorage.getItem("oengo_user_id") || "user_courier" : "user_courier");
       const order = await confirmPickup(activeOrder.id, activeOrder.pickupBarcode);
       setActiveOrder(order);
       setLogMessage(`Pickup barcode verified (${activeOrder.pickupBarcode})! Order is now IN_TRANSIT.`);

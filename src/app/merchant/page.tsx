@@ -34,7 +34,7 @@ export default function MerchantPortal() {
   const [barcodeModalOrder, setBarcodeModalOrder] = useState<OrderData | null>(null);
   const [showAddDishModal, setShowAddDishModal] = useState<boolean>(false);
 
-  const RESTAURANT_ID = "user_restaurant";
+  const RESTAURANT_ID = typeof window !== "undefined" ? localStorage.getItem("oengo_user_id") || "user_restaurant" : "user_restaurant";
 
   const fetchAllData = useCallback(async () => {
     try {
