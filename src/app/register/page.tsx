@@ -30,9 +30,7 @@ export default function RegisterPage() {
       localStorage.setItem("oengo_user_id", data.user.id);
       localStorage.setItem("oengo_user_role", data.user.role);
       
-      if (data.user.role === "RESTAURANT") router.push("/merchant");
-      else if (data.user.role === "COURIER") router.push("/rider");
-      else router.push("/");
+      router.push("/dashboard");
     } catch (err: any) {
       setError(err.message);
     } finally {

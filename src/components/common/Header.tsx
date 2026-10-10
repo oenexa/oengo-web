@@ -42,11 +42,11 @@ export function Header({
   const getPortalLink = () => {
     switch (role) {
       case "ADMIN":
-        return { href: "/admin", text: "⚡ Admin Console", color: "purple" };
+        return { href: "/dashboard", text: "⚡ Admin Console", color: "purple" };
       case "RESTAURANT":
-        return { href: "/merchant", text: "👨‍🍳 Kitchen Portal", color: "orange" };
+        return { href: "/dashboard", text: "👨‍🍳 Kitchen Portal", color: "orange" };
       case "COURIER":
-        return { href: "/rider", text: "🚴 Rider App", color: "cyan" };
+        return { href: "/dashboard", text: "🚴 Rider App", color: "cyan" };
       case "CUSTOMER":
         return { href: "/", text: "🛒 Storefront", color: "emerald" };
       default:
