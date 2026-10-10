@@ -238,46 +238,24 @@ export default function MerchantPortal() {
         <span className="text-slate-500">Auto-refresh: 6s</span>
       </div>
 
-      {/* 4. Tab 1: Live Kitchen Display System (KDS) */}
       {activeTab === "KDS" && (
-        <div>
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-            <div className="flex items-center gap-1.5 p-1 bg-slate-900 rounded-xl border border-slate-800">
-              {[
-                { key: "ALL", label: "All Active" },
-                { key: "AWAITING_RESTAURANT", label: "New Orders 🔴" },
-                { key: "PREPARING", label: "Cooking 👨‍🍳" },
-                { key: "READY_FOR_PICKUP", label: "Ready at Counter 📦" },
-                { key: "DELIVERED", label: "Past Delivered" }
-              ].map(tab => (
-                <button
-                  key={tab.key}
-                  onClick={() => setFilterStatus(tab.key)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                    filterStatus === tab.key
-                      ? "bg-slate-800 text-orange-400 shadow border border-slate-700 font-black"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start h-[calc(100vh-250px)] overflow-hidden">
+          
+          {/* Column 1: New Orders */}
+          <div className="flex flex-col h-full bg-slate-900/50 rounded-2xl border border-slate-800 overflow-hidden">
+            <div className="bg-red-500/10 border-b border-red-500/20 p-4 flex items-center justify-between">
+              <h3 className="text-red-400 font-black flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> NEW TICKETS
+              </h3>
+              <span className="bg-red-500/20 text-red-300 text-xs px-2 py-0.5 rounded-full font-bold">
+                {orders.filter(o => o.status === "AWAITING_RESTAURANT").length}
+              </span>
             </div>
-
-            <div className="text-xs text-slate-400">
-              Showing <strong className="text-white">{filteredOrders.length}</strong> kitchen tickets
-            </div>
-          </div>
-
-          {filteredOrders.length === 0 ? (
-            <div className="bg-slate-900/40 border border-dashed border-slate-800 rounded-3xl p-12 text-center text-slate-500">
-              <span className="text-4xl block mb-2">🍽️</span>
-              <p className="text-base font-bold text-slate-400">No tickets matching this status filter.</p>
-              <p className="text-xs text-slate-500 mt-1">Orders placed by customers will chime and appear instantly.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredOrders.map(order => (
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {orders.filter(o => o.status === "AWAITING_RESTAURANT").length === 0 && (
+                <p className="text-slate-500 text-sm text-center mt-10">No new orders.</p>
+              )}
+              {orders.filter(o => o.status === "AWAITING_RESTAURANT").map(order => (
                 <KdsTicketCard
                   key={order.id}
                   order={order}
@@ -289,7 +267,64 @@ export default function MerchantPortal() {
                 />
               ))}
             </div>
-          )}
+          </div>
+
+          {/* Column 2: Preparing */}
+          <div className="flex flex-col h-full bg-slate-900/50 rounded-2xl border border-slate-800 overflow-hidden">
+            <div className="bg-amber-500/10 border-b border-amber-500/20 p-4 flex items-center justify-between">
+              <h3 className="text-amber-400 font-black flex items-center gap-2">
+                👨‍🍳 PREPARING
+              </h3>
+              <span className="bg-amber-500/20 text-amber-300 text-xs px-2 py-0.5 rounded-full font-bold">
+                {orders.filter(o => o.status === "PREPARING").length}
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {orders.filter(o => o.status === "PREPARING").length === 0 && (
+                <p className="text-slate-500 text-sm text-center mt-10">Kitchen is clear.</p>
+              )}
+              {orders.filter(o => o.status === "PREPARING").map(order => (
+                <KdsTicketCard
+                  key={order.id}
+                  order={order}
+                  loading={loading}
+                  onAccept={handleAcceptOrder}
+                  onMarkReady={handleMarkReady}
+                  onDecline={handleDeclineOrder}
+                  onShowBarcode={setBarcodeModalOrder}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Column 3: Ready for Pickup */}
+          <div className="flex flex-col h-full bg-slate-900/50 rounded-2xl border border-slate-800 overflow-hidden">
+            <div className="bg-emerald-500/10 border-b border-emerald-500/20 p-4 flex items-center justify-between">
+              <h3 className="text-emerald-400 font-black flex items-center gap-2">
+                📦 READY AT COUNTER
+              </h3>
+              <span className="bg-emerald-500/20 text-emerald-300 text-xs px-2 py-0.5 rounded-full font-bold">
+                {orders.filter(o => o.status === "READY_FOR_PICKUP").length}
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {orders.filter(o => o.status === "READY_FOR_PICKUP").length === 0 && (
+                <p className="text-slate-500 text-sm text-center mt-10">No orders waiting for couriers.</p>
+              )}
+              {orders.filter(o => o.status === "READY_FOR_PICKUP").map(order => (
+                <KdsTicketCard
+                  key={order.id}
+                  order={order}
+                  loading={loading}
+                  onAccept={handleAcceptOrder}
+                  onMarkReady={handleMarkReady}
+                  onDecline={handleDeclineOrder}
+                  onShowBarcode={setBarcodeModalOrder}
+                />
+              ))}
+            </div>
+          </div>
+
         </div>
       )}
 
