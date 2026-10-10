@@ -93,22 +93,22 @@ export default function RiderPortalPage() {
 
             <Link
               href="/"
-              className="text-xs font-semibold text-slate-400 hover:text-white px-3 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 transition"
+              className="text-xs font-semibold text-slate-400 hover:text-white px-3 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 transition cursor-pointer"
             >
-              🍔 Storefront
+              🛒 View Storefront
             </Link>
-            <Link
-              href="/merchant"
-              className="text-xs font-semibold text-orange-400 hover:text-orange-300 px-3 py-1.5 rounded-lg bg-orange-950/60 border border-orange-800/50 hover:bg-orange-900 transition"
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  localStorage.removeItem("oengo_user_id");
+                  localStorage.removeItem("oengo_user_role");
+                  window.location.href = "/login";
+                }
+              }}
+              className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-red-950 border border-slate-800 hover:border-red-900 text-slate-400 hover:text-red-400 font-bold text-xs transition cursor-pointer"
             >
-              👨‍🍳 Kitchen
-            </Link>
-            <Link
-              href="/admin"
-              className="text-xs font-semibold text-purple-400 hover:text-purple-300 px-3 py-1.5 rounded-lg bg-purple-950/60 border border-purple-800/50 hover:bg-purple-900 transition"
-            >
-              ⚡ Admin
-            </Link>
+              Log Out
+            </button>
           </div>
         </div>
       </header>

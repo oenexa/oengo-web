@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { WalletData } from "@/types";
 import { WalletBadge } from "./WalletBadge";
+import { useRouter } from "next/navigation";
 
 interface HeaderProps {
   wallet: WalletData | null;
@@ -21,14 +23,49 @@ export function Header({
   onAddressChange,
   onOpenProfile
 }: HeaderProps) {
+  const router = useRouter();
+  const [role, setRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setRole(localStorage.getItem("oengo_user_role"));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("oengo_user_id");
+    localStorage.removeItem("oengo_user_role");
+    setRole(null);
+    router.push("/login");
+  };
+
+  const getPortalLink = () => {
+    switch (role) {
+      case "ADMIN":
+        return { href: "/admin", text: "⚡ Admin Console", color: "purple" };
+      case "RESTAURANT":
+        return { href: "/merchant", text: "👨‍🍳 Kitchen Portal", color: "orange" };
+      case "COURIER":
+        return { href: "/rider", text: "🚴 Rider App", color: "cyan" };
+      case "CUSTOMER":
+        return { href: "/", text: "🛒 Storefront", color: "emerald" };
+      default:
+        return null;
+    }
+  };
+
+  const portal = getPortalLink();
+
   return (
     <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between border-b border-slate-800 pb-6 mb-8 gap-4">
       <div>
         <div className="flex items-center gap-3">
           <span className="text-3xl">🍔</span>
-          <h1 className="text-2xl font-black tracking-tight text-white">
-            OENGO <span className="text-orange-500 text-xs font-bold px-2.5 py-0.5 rounded-full bg-orange-950/80 border border-orange-800">Decentralized Delivery</span>
-          </h1>
+          <Link href="/">
+            <h1 className="text-2xl font-black tracking-tight text-white hover:text-slate-200 transition">
+              OENGO <span className="text-orange-500 text-xs font-bold px-2.5 py-0.5 rounded-full bg-orange-950/80 border border-orange-800">Decentralized Delivery</span>
+            </h1>
+          </Link>
         </div>
 
         {/* Geolocation Address Line */}
@@ -65,9 +102,9 @@ export function Header({
 
       {/* Header Right: Portals & Navigation */}
       <div className="flex items-center gap-2 flex-wrap">
-        <WalletBadge wallet={wallet} />
+        {role && <WalletBadge wallet={wallet} />}
 
-        {onOpenProfile && (
+        {onOpenProfile && role === "CUSTOMER" && (
           <button
             onClick={onOpenProfile}
             className="px-3 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
@@ -77,48 +114,39 @@ export function Header({
           </button>
         )}
 
-        <Link
-          href="/login"
-          className="px-3 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs"
-        >
-          Login
-        </Link>
-        <Link
-          href="/register"
-          className="px-3 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs"
-        >
-          Register
-        </Link>
-        <Link
-          href="/kyc"
-          className="px-3 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs"
-        >
-          KYC
-        </Link>
-
-        <Link
-          href="/merchant"
-          className="px-3 py-2.5 rounded-2xl bg-orange-950/70 hover:bg-orange-900 border border-orange-700/60 text-orange-300 font-bold text-xs flex items-center gap-1.5 transition shadow-lg shadow-orange-500/5 hover:border-orange-500 cursor-pointer"
-        >
-          <span>👨‍🍳</span>
-          <span>Kitchen (KDS)</span>
-        </Link>
-
-        <Link
-          href="/rider"
-          className="px-3 py-2.5 rounded-2xl bg-cyan-950/70 hover:bg-cyan-900 border border-cyan-700/60 text-cyan-300 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
-        >
-          <span>🚴</span>
-          <span>Rider App</span>
-        </Link>
-
-        <Link
-          href="/admin"
-          className="px-3 py-2.5 rounded-2xl bg-purple-950/70 hover:bg-purple-900 border border-purple-700/60 text-purple-300 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
-        >
-          <span>⚡</span>
-          <span>Admin</span>
-        </Link>
+        {!role ? (
+          <>
+            <Link
+              href="/login"
+              className="px-4 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition"
+            >
+              Login
+            </Link>
+            <Link
+              href="/register"
+              className="px-4 py-2.5 rounded-2xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition"
+            >
+              Sign Up
+            </Link>
+          </>
+        ) : (
+          <>
+            {portal && portal.href !== "/" && (
+              <Link
+                href={portal.href}
+                className={`px-3 py-2.5 rounded-2xl bg-${portal.color}-950/70 hover:bg-${portal.color}-900 border border-${portal.color}-700/60 text-${portal.color}-300 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer`}
+              >
+                {portal.text}
+              </Link>
+            )}
+            <button
+              onClick={handleLogout}
+              className="px-3 py-2.5 rounded-2xl bg-slate-900 hover:bg-red-950 border border-slate-800 hover:border-red-900 text-slate-400 hover:text-red-400 font-bold text-xs transition cursor-pointer"
+            >
+              Log Out
+            </button>
+          </>
+        )}
       </div>
     </header>
   );
