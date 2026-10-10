@@ -339,3 +339,29 @@ export async function getRecommendations(): Promise<any> {
   const data = await res.json();
   return data.recommendations;
 }
+
+export async function loginUser(email: string, password: string):Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/users/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to login');
+  }
+  return res.json();
+}
+
+export async function registerUser(name: string, email: string, password: string, role: string):Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/users/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email, password, role })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to register');
+  }
+  return res.json();
+}

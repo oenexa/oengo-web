@@ -68,16 +68,17 @@ export function useStorefront() {
       // Local fallback
       setWallet({
         digital: { fiatEUR: 50.00, loyaltyPoints: 120, type: "OFF_CHAIN_CREDITS" },
-        web3: { usdcBalance: 0, oenBalance: 0, address: "0x..." },
-        userId: "user_customer",
-        isActive: true
+        crypto: { balanceOEN: "0", address: "0x...", type: "ON_CHAIN_WALLET" }
       });
     }
   }, []);
 
   useEffect(() => {
     refreshWallet();
-    getCommission().then(c => setCommissionPct(c.ratePct)).catch(() => {});
+    getCommission().then(c => {
+      // Handle either number or object with ratePct depending on what api returns
+      setCommissionPct(typeof c === 'number' ? c : (c as any).ratePct || 5);
+    }).catch(() => {});
     getRestaurants().then(setRestaurants).catch(() => {});
   }, [refreshWallet]);
 
@@ -104,19 +105,19 @@ export function useStorefront() {
     setLogMessage(`Added ${item.name} to cart.`);
   };
 
-  const handleAddToCartWithCustomizations = (item: MenuItem, choices: CustomizationChoice[]) => {
+  const handleAddToCartWithCustomizations = (item: MenuItem, qty: number, choices: CustomizationChoice[]) => {
     setCart(prev => [...prev, { item, qty: 1, customizations: choices }]);
     setCustomizingDish(null);
     setLogMessage(`Added customized ${item.name} to cart.`);
   };
 
-  const handleUpdateQty = (itemId: string, delta: number) => {
+  const handleUpdateQty = (index: number, delta: number) => {
     setCart(prev => {
-      const existing = prev.find(c => c.item.id === itemId);
+      const existing = prev[index];
       if (!existing) return prev;
       const newQty = existing.qty + delta;
-      if (newQty <= 0) return prev.filter(c => c.item.id !== itemId);
-      return prev.map(c => c.item.id === itemId ? { ...c, qty: newQty } : c);
+      if (newQty <= 0) return prev.filter((_, i) => i !== index);
+      return prev.map((c, i) => i === index ? { ...c, qty: newQty } : c);
     });
   };
 
