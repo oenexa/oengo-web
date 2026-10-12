@@ -53,9 +53,9 @@ export function Header({
       case "ADMIN":
         return { href: "/dashboard", text: t("header.adminConsole", "⚡ Admin Console"), color: "purple" };
       case "RESTAURANT":
-        return { href: "/dashboard", text: t("header.kitchenPortal", "👨‍🍳 Kitchen Portal"), color: "orange" };
+        return { href: "/restaurant", text: t("header.kitchenPortal", "👨‍🍳 Kitchen Portal"), color: "orange" };
       case "COURIER":
-        return { href: "/dashboard", text: t("header.riderApp", "🚴 Rider App"), color: "cyan" };
+        return { href: "/courier", text: t("header.riderApp", "🚴 Rider App"), color: "cyan" };
       case "CUSTOMER":
         return { href: "/", text: t("header.storefront", "🛒 Storefront"), color: "emerald" };
       default:

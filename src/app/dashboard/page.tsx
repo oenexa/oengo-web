@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import AdminDashboardPage from "@/components/portals/AdminPortal";
 import MerchantPortalPage from "@/components/portals/MerchantPortal";
 import RiderPortalPage from "@/components/portals/RiderPortal";
-import CustomerPage from "@/app/page";
 
 export default function DashboardHub() {
   const [role, setRole] = useState<string | null>(null);
@@ -17,6 +16,14 @@ export default function DashboardHub() {
       router.push("/login");
     } else {
       setRole(userRole);
+      // Clean SRE professional routing to dedicated routes
+      if (userRole === "RESTAURANT") {
+        router.replace("/restaurant");
+      } else if (userRole === "COURIER") {
+        router.replace("/courier");
+      } else if (userRole === "CUSTOMER") {
+        router.replace("/");
+      }
     }
   }, [router]);
 
@@ -29,7 +36,7 @@ export default function DashboardHub() {
     );
   }
 
-  // Unified Role-Based Routing (RP - Routing Pattern / Render Pattern)
+  // Fallback rendering
   switch (role) {
     case "ADMIN":
       return <AdminDashboardPage />;

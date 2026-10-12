@@ -138,49 +138,101 @@ export default function Home() {
                 />
               </section>
 
-              {/* Workspace: Menu Catalog & Sticky Cart */}
-              <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start" aria-label="Storefront Workspace">
-                <div className="lg:col-span-8">
-                  <MenuCatalog
-                    restaurant={selectedRestaurant}
-                    menuItems={menuItems}
-                    onAddToCart={handleAddToCart}
-                    onCustomize={dish => setCustomizingDish(dish)}
-                  />
-                </div>
+              {/* Workspace: Dedicated Menu Catalog for Selected Restaurant & Sticky Cart */}
+              {selectedRestaurant ? (
+                <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-in fade-in duration-300" aria-label="Storefront Workspace">
+                  <div className="lg:col-span-8">
+                    <div className="flex items-center justify-between mb-4 bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{selectedRestaurant.icon}</span>
+                        <div>
+                          <h3 className="text-sm font-black text-white">{selectedRestaurant.name}</h3>
+                          <p className="text-xs text-slate-400">Viewing exclusive menu dishes</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleSelectRestaurant(null as any)}
+                        className="px-3 py-1.5 rounded-xl bg-slate-850 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-slate-300 hover:text-white transition cursor-pointer"
+                      >
+                        ✕ Close Menu
+                      </button>
+                    </div>
 
-                <aside className="lg:col-span-4 sticky top-24 space-y-6" aria-label="Shopping Cart">
-                  <CartDrawer
-                    cart={cart}
-                    onUpdateQty={handleUpdateQty}
-                    foodSubtotal={foodSubtotal}
-                    deliveryFee={deliveryFee}
-                    tipEUR={tipEUR}
-                    setTipEUR={setTipEUR}
-                    carbonNeutral={carbonNeutral}
-                    setCarbonNeutral={setCarbonNeutral}
-                    orderTotal={orderTotal}
-                    commissionPct={commissionPct}
-                    onUpdateCommission={handleUpdateCommission}
-                    loading={loading}
-                    logMessage={logMessage}
-                    selectedMethod={selectedMethod}
-                    onSelectMethod={setSelectedMethod}
-                    wallet={wallet}
-                    cardNumber={cardNumber}
-                    setCardNumber={setCardNumber}
-                    cardHolder={cardHolder}
-                    setCardHolder={setCardHolder}
-                    cardExp={cardExp}
-                    setCardExp={setCardExp}
-                    cardCvc={cardCvc}
-                    setCardCvc={setCardCvc}
-                    saveCard={saveCard}
-                    setSaveCard={setSaveCard}
-                    onPlaceOrder={handlePlaceOrder}
-                  />
-                </aside>
-              </section>
+                    <MenuCatalog
+                      restaurant={selectedRestaurant}
+                      menuItems={menuItems}
+                      onAddToCart={handleAddToCart}
+                      onCustomize={dish => setCustomizingDish(dish)}
+                    />
+                  </div>
+
+                  <aside className="lg:col-span-4 sticky top-24 space-y-6" aria-label="Shopping Cart">
+                    <CartDrawer
+                      cart={cart}
+                      onUpdateQty={handleUpdateQty}
+                      foodSubtotal={foodSubtotal}
+                      deliveryFee={deliveryFee}
+                      tipEUR={tipEUR}
+                      setTipEUR={setTipEUR}
+                      carbonNeutral={carbonNeutral}
+                      setCarbonNeutral={setCarbonNeutral}
+                      orderTotal={orderTotal}
+                      commissionPct={commissionPct}
+                      onUpdateCommission={handleUpdateCommission}
+                      loading={loading}
+                      logMessage={logMessage}
+                      selectedMethod={selectedMethod}
+                      onSelectMethod={setSelectedMethod}
+                      wallet={wallet}
+                      cardNumber={cardNumber}
+                      setCardNumber={setCardNumber}
+                      cardHolder={cardHolder}
+                      setCardHolder={setCardHolder}
+                      cardExp={cardExp}
+                      setCardExp={setCardExp}
+                      cardCvc={cardCvc}
+                      setCardCvc={setCardCvc}
+                      saveCard={saveCard}
+                      setSaveCard={setSaveCard}
+                      onPlaceOrder={handlePlaceOrder}
+                    />
+                  </aside>
+                </section>
+              ) : cart.length > 0 ? (
+                <section className="flex justify-end animate-in fade-in duration-200">
+                  <div className="w-full max-w-md">
+                    <CartDrawer
+                      cart={cart}
+                      onUpdateQty={handleUpdateQty}
+                      foodSubtotal={foodSubtotal}
+                      deliveryFee={deliveryFee}
+                      tipEUR={tipEUR}
+                      setTipEUR={setTipEUR}
+                      carbonNeutral={carbonNeutral}
+                      setCarbonNeutral={setCarbonNeutral}
+                      orderTotal={orderTotal}
+                      commissionPct={commissionPct}
+                      onUpdateCommission={handleUpdateCommission}
+                      loading={loading}
+                      logMessage={logMessage}
+                      selectedMethod={selectedMethod}
+                      onSelectMethod={setSelectedMethod}
+                      wallet={wallet}
+                      cardNumber={cardNumber}
+                      setCardNumber={setCardNumber}
+                      cardHolder={cardHolder}
+                      setCardHolder={setCardHolder}
+                      cardExp={cardExp}
+                      setCardExp={setCardExp}
+                      cardCvc={cardCvc}
+                      setCardCvc={setCardCvc}
+                      saveCard={saveCard}
+                      setSaveCard={setSaveCard}
+                      onPlaceOrder={handlePlaceOrder}
+                    />
+                  </div>
+                </section>
+              ) : null}
             </div>
           </>
         )}
