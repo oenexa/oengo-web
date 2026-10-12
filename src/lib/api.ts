@@ -340,8 +340,8 @@ export async function getRecommendations(): Promise<any> {
   return data.recommendations;
 }
 
-export async function loginUser(email: string, password: string):Promise<any> {
-  const res = await fetch(`${API_BASE_URL}/users/login`, {
+export async function loginUser(email: string, password: string): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password })
@@ -353,11 +353,33 @@ export async function loginUser(email: string, password: string):Promise<any> {
   return res.json();
 }
 
-export async function registerUser(name: string, email: string, password: string, role: string):Promise<any> {
-  const res = await fetch(`${API_BASE_URL}/users/register`, {
+export interface RegisterUserPayload {
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+  phone?: string;
+  businessName?: string;
+  vatId?: string;
+  iban?: string;
+  bic?: string;
+  businessAddress?: string;
+  country?: string;
+  gdprConsent?: boolean;
+}
+
+export async function registerUser(payload: RegisterUserPayload | string, email?: string, password?: string, role?: string): Promise<any> {
+  let bodyData: any;
+  if (typeof payload === "string") {
+    bodyData = { name: payload, email, password, role };
+  } else {
+    bodyData = payload;
+  }
+
+  const res = await fetch(`${API_BASE_URL}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email, password, role })
+    body: JSON.stringify(bodyData)
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));

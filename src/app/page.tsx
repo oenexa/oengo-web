@@ -147,6 +147,8 @@ export default function Home() {
               restaurants={filteredRestaurants}
               selectedRestaurant={selectedRestaurant}
               onSelectRestaurant={handleSelectRestaurant}
+              onAddToCart={handleAddToCart}
+              onCustomize={dish => setCustomizingDish(dish)}
             />
 
             {/* Workspace: Menu Catalog & Sticky Cart */}
