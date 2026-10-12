@@ -58,6 +58,8 @@ export function useStorefront() {
   // State: Modals & Portals
   const [customizingDish, setCustomizingDish] = useState<MenuItem | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
+  const [isKYCModalOpen, setIsKYCModalOpen] = useState<boolean>(false);
+  const [isKYCVerified, setIsKYCVerified] = useState<boolean>(false);
 
   // Load initial context
   const refreshWallet = useCallback(async () => {
@@ -298,5 +300,10 @@ export function useStorefront() {
     handleConfirmDelivery,
     isProfileOpen,
     setIsProfileOpen,
+    isKYCModalOpen,
+    setIsKYCModalOpen,
+    isKYCVerified,
+    setIsKYCVerified,
+    refreshWallet,
   };
 }

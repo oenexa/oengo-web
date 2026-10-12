@@ -32,9 +32,30 @@ export async function depositWallet(userId = getActiveUserId("user_customer"), a
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ userId, amount })
   });
-  if (!res.ok) throw new Error("Failed to deposit to wallet");
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to deposit to wallet");
+  }
   const data = await res.json();
   return data.newBalanceEUR;
+}
+
+export async function verifyCustomerKYC(
+  userId = getActiveUserId("user_customer"), 
+  tier = 2, 
+  docType = "PASSPORT", 
+  docNumber = ""
+): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/kyc/customer/verify`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, tier, docType, docNumber })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Customer KYC verification failed");
+  }
+  return await res.json();
 }
 
 export async function getCoinProfile(userId = getActiveUserId("user_customer")): Promise<CoinProfile> {

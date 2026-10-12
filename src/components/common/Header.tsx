@@ -16,6 +16,8 @@ interface HeaderProps {
   onSaveAddress: (address: string) => void;
   onAddressChange: (address: string) => void;
   onOpenProfile?: () => void;
+  onOpenKYC?: () => void;
+  isKYCVerified?: boolean;
 }
 
 export function Header({
@@ -25,7 +27,9 @@ export function Header({
   onToggleEditAddress,
   onSaveAddress,
   onAddressChange,
-  onOpenProfile
+  onOpenProfile,
+  onOpenKYC,
+  isKYCVerified = false
 }: HeaderProps) {
   const router = useRouter();
   const [role, setRole] = useState<string | null>(null);
@@ -112,7 +116,7 @@ export function Header({
       <div className="flex items-center gap-2 flex-wrap">
         <LanguageSelector />
 
-        {role && <WalletBadge wallet={wallet} />}
+        {role && <WalletBadge wallet={wallet} onOpenKYC={onOpenKYC} isKYCVerified={isKYCVerified} />}
 
         {onOpenProfile && role === "CUSTOMER" && (
           <button

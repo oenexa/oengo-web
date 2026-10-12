@@ -8,6 +8,7 @@ import { MenuCatalog } from "@/components/customer/MenuCatalog";
 import { CartDrawer } from "@/components/customer/CartDrawer";
 import { DishCustomizationModal } from "@/components/customer/DishCustomizationModal";
 import { CustomerProfileDrawer } from "@/components/customer/CustomerProfileDrawer";
+import { CustomerKYCModal } from "@/components/customer/CustomerKYCModal";
 import { ActiveOrderTrackingView } from "@/components/tracking/ActiveOrderTrackingView";
 import { useStorefront } from "@/hooks/useStorefront";
 
@@ -64,6 +65,11 @@ export default function Home() {
     handleConfirmDelivery,
     isProfileOpen,
     setIsProfileOpen,
+    isKYCModalOpen,
+    setIsKYCModalOpen,
+    isKYCVerified,
+    setIsKYCVerified,
+    refreshWallet,
   } = useStorefront();
 
   return (
@@ -83,6 +89,8 @@ export default function Home() {
             }}
             onAddressChange={setDeliveryAddress}
             onOpenProfile={() => setIsProfileOpen(true)}
+            onOpenKYC={() => setIsKYCModalOpen(true)}
+            isKYCVerified={isKYCVerified}
           />
         </div>
       </nav>
@@ -189,6 +197,15 @@ export default function Home() {
       <CustomerProfileDrawer
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
+      />
+
+      <CustomerKYCModal
+        isOpen={isKYCModalOpen}
+        onClose={() => setIsKYCModalOpen(false)}
+        onSuccess={() => {
+          setIsKYCVerified(true);
+          refreshWallet();
+        }}
       />
     </div>
   );
