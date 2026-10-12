@@ -1,5 +1,81 @@
 import { API_BASE_URL } from "./constants";
 
+// ── Enterprise Structured API Error System ──────────────────────────────────
+export type ApiErrorCode =
+  | "ERR_BAD_REQUEST"
+  | "ERR_VALIDATION_FAILED"
+  | "ERR_UNAUTHORIZED"
+  | "ERR_FORBIDDEN"
+  | "ERR_KYC_VERIFICATION_REQUIRED"
+  | "ERR_RESOURCE_NOT_FOUND"
+  | "ERR_CONFLICT_DUPLICATE"
+  | "ERR_INSUFFICIENT_FUNDS"
+  | "ERR_LEDGER_IMBALANCE"
+  | "ERR_ESCROW_LOCKED"
+  | "ERR_INVALID_SECURITY_CODE"
+  | "ERR_DATABASE_OPERATION"
+  | "ERR_INTERNAL_SERVER"
+  | "ERR_NETWORK_UNREACHABLE"
+  | string;
+
+export class ApiClientError extends Error {
+  public readonly status: number;
+  public readonly code: ApiErrorCode;
+  public readonly requestId?: string;
+  public readonly timestamp?: string;
+  public readonly details?: Record<string, any>;
+
+  constructor(params: {
+    message: string;
+    status: number;
+    code?: ApiErrorCode;
+    requestId?: string;
+    timestamp?: string;
+    details?: Record<string, any>;
+  }) {
+    super(params.message);
+    this.name = "ApiClientError";
+    this.status = params.status;
+    this.code = params.code || "ERR_INTERNAL_SERVER";
+    this.requestId = params.requestId;
+    this.timestamp = params.timestamp;
+    this.details = params.details;
+  }
+
+  public isKYCRequired(): boolean {
+    return this.code === "ERR_KYC_VERIFICATION_REQUIRED";
+  }
+
+  public isInsufficientFunds(): boolean {
+    return this.code === "ERR_INSUFFICIENT_FUNDS" || this.status === 402;
+  }
+
+  public isUnauthorized(): boolean {
+    return this.code === "ERR_UNAUTHORIZED" || this.status === 401;
+  }
+
+  public isNotFound(): boolean {
+    return this.code === "ERR_RESOURCE_NOT_FOUND" || this.status === 404;
+  }
+
+  public isValidationError(): boolean {
+    return this.code === "ERR_VALIDATION_FAILED" || this.status === 422;
+  }
+}
+
+export async function parseApiError(res: Response, fallbackMessage: string, preParsedBody?: any): Promise<ApiClientError> {
+  const body = preParsedBody ?? (await res.json().catch(() => ({})));
+  const headerReqId = res.headers?.get("X-Request-ID") || undefined;
+  return new ApiClientError({
+    message: body.error || body.message || fallbackMessage,
+    status: res.status,
+    code: body.code || (res.status === 404 ? "ERR_RESOURCE_NOT_FOUND" : res.status === 401 ? "ERR_UNAUTHORIZED" : "ERR_BAD_REQUEST"),
+    requestId: body.requestId || headerReqId,
+    timestamp: body.timestamp,
+    details: body.details,
+  });
+}
+
 // ── Authentication & Auth State ─────────────────────────────────────────────
 export function getActiveUserId(fallback: string): string {
   if (typeof window !== "undefined") {
@@ -21,7 +97,7 @@ import {
 // ── Wallet & Coin APIs ───────────────────────────────────────────────────────
 export async function getWallet(userId = getActiveUserId("user_customer")): Promise<WalletData> {
   const res = await fetch(`${API_BASE_URL}/wallet/${userId}`);
-  if (!res.ok) throw new Error("Failed to fetch wallet");
+  if (!res.ok) throw await parseApiError(res, "Failed to fetch wallet");
   const data = await res.json();
   return data.wallets;
 }
@@ -33,8 +109,7 @@ export async function depositWallet(userId = getActiveUserId("user_customer"), a
     body: JSON.stringify({ userId, amount })
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || "Failed to deposit to wallet");
+    throw await parseApiError(res, "Failed to deposit to wallet");
   }
   const data = await res.json();
   return data.newBalanceEUR;
@@ -52,15 +127,14 @@ export async function verifyCustomerKYC(
     body: JSON.stringify({ userId, tier, docType, docNumber })
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || "Customer KYC verification failed");
+    throw await parseApiError(res, "Customer KYC verification failed");
   }
   return await res.json();
 }
 
 export async function getCoinProfile(userId = getActiveUserId("user_customer")): Promise<CoinProfile> {
   const res = await fetch(`${API_BASE_URL}/coins/${userId}`);
-  if (!res.ok) throw new Error("Failed to fetch coins");
+  if (!res.ok) throw await parseApiError(res, "Failed to fetch coins");
   return await res.json();
 }
 
@@ -70,8 +144,8 @@ export async function redeemCoins(userId = getActiveUserId("user_customer"), coi
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ userId, coins, subtotal })
   });
-  const data = await res.json();
-  if (!res.ok || !data.success) throw new Error(data.error || "Failed to redeem coins");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.success) throw await parseApiError(res, "Failed to redeem coins", data);
   return data.discountEUR;
 }
 
@@ -89,7 +163,7 @@ export async function updateCommission(ratePct: number): Promise<void> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ratePct })
   });
-  if (!res.ok) throw new Error("Failed to update commission");
+  if (!res.ok) throw await parseApiError(res, "Failed to update commission");
 }
 
 // ── Restaurant & Menu APIs ──────────────────────────────────────────────────
@@ -99,14 +173,14 @@ export async function getRestaurants(cuisine?: string, search?: string): Promise
   if (search) params.append("search", search);
 
   const res = await fetch(`${API_BASE_URL}/restaurants?${params.toString()}`);
-  if (!res.ok) throw new Error("Failed to fetch restaurants");
+  if (!res.ok) throw await parseApiError(res, "Failed to fetch restaurants");
   const data = await res.json();
   return data.restaurants || [];
 }
 
 export async function getRestaurantProfile(restaurantId: string): Promise<RestaurantProfile> {
   const res = await fetch(`${API_BASE_URL}/restaurants/${restaurantId}`);
-  if (!res.ok) throw new Error("Failed to fetch restaurant profile");
+  if (!res.ok) throw await parseApiError(res, "Failed to fetch restaurant profile");
   const data = await res.json();
   return data.restaurant;
 }
@@ -120,14 +194,14 @@ export async function updateRestaurantProfile(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(updates)
   });
-  if (!res.ok) throw new Error("Failed to update restaurant profile");
+  if (!res.ok) throw await parseApiError(res, "Failed to update restaurant profile");
   const data = await res.json();
   return data.restaurant;
 }
 
 export async function getRestaurantMenu(restaurantId: string): Promise<MenuItem[]> {
   const res = await fetch(`${API_BASE_URL}/restaurants/${restaurantId}/menu`);
-  if (!res.ok) throw new Error("Failed to fetch menu");
+  if (!res.ok) throw await parseApiError(res, "Failed to fetch menu");
   const data = await res.json();
   return data.menu || [];
 }
@@ -141,7 +215,7 @@ export async function addDish(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(dishData)
   });
-  if (!res.ok) throw new Error("Failed to add dish");
+  if (!res.ok) throw await parseApiError(res, "Failed to add dish");
   const data = await res.json();
   return data.item;
 }
@@ -156,7 +230,7 @@ export async function updateDish(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(updates)
   });
-  if (!res.ok) throw new Error("Failed to update dish");
+  if (!res.ok) throw await parseApiError(res, "Failed to update dish");
   const data = await res.json();
   return data.item;
 }
@@ -165,7 +239,7 @@ export async function deleteDish(restaurantId: string, itemId: string): Promise<
   const res = await fetch(`${API_BASE_URL}/restaurants/${restaurantId}/menu/${itemId}`, {
     method: "DELETE"
   });
-  if (!res.ok) throw new Error("Failed to delete dish");
+  if (!res.ok) throw await parseApiError(res, "Failed to delete dish");
 }
 
 export async function getRestaurantOrders(restaurantId: string, status?: string): Promise<OrderData[]> {
@@ -173,7 +247,7 @@ export async function getRestaurantOrders(restaurantId: string, status?: string)
     ? `${API_BASE_URL}/orders?restaurantId=${restaurantId}&status=${status}` 
     : `${API_BASE_URL}/orders?restaurantId=${restaurantId}`;
   const res = await fetch(url);
-  if (!res.ok) throw new Error("Failed to fetch orders");
+  if (!res.ok) throw await parseApiError(res, "Failed to fetch orders");
   const data = await res.json();
   return data.orders || [];
 }
@@ -194,9 +268,9 @@ export async function confirmCardPayment(payload: ConfirmCardPayload): Promise<C
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok || !data.success) {
-    throw new Error(data.error || "Card payment confirmation failed");
+    throw await parseApiError(res, "Card payment confirmation failed", data);
   }
   return {
     transactionId: data.transactionId,
@@ -211,8 +285,8 @@ export async function instantPay(userId: string, method: string, amount: number)
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ userId, method, amount })
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Instant pay failed");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw await parseApiError(res, "Instant pay failed", data);
   return data;
 }
 
@@ -238,9 +312,9 @@ export async function createOrder(payload: CreateOrderPayload): Promise<OrderDat
       ...payload
     })
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok || !data.success) {
-    throw new Error(data.error || "Failed to create order");
+    throw await parseApiError(res, "Failed to create order", data);
   }
   return data.order;
 }
@@ -251,8 +325,8 @@ export async function acceptOrder(orderId: string, etaMinutes?: number): Promise
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ etaMinutes: etaMinutes ?? 15 })
   });
-  const data = await res.json();
-  if (!res.ok || !data.success) throw new Error(data.error || "Failed to accept order");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.success) throw await parseApiError(res, "Failed to accept order", data);
   return data.order;
 }
 
@@ -261,8 +335,8 @@ export async function readyOrder(orderId: string): Promise<OrderData> {
     method: "POST",
     headers: { "Content-Type": "application/json" }
   });
-  const data = await res.json();
-  if (!res.ok || !data.success) throw new Error(data.error || "Failed to mark order ready");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.success) throw await parseApiError(res, "Failed to mark order ready", data);
   return data.order;
 }
 
@@ -272,8 +346,8 @@ export async function declineOrder(orderId: string, reason?: string): Promise<Or
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ reason })
   });
-  const data = await res.json();
-  if (!res.ok || !data.success) throw new Error(data.error || "Failed to decline order");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.success) throw await parseApiError(res, "Failed to decline order", data);
   return data.order;
 }
 
@@ -296,8 +370,8 @@ export async function confirmPickup(orderId: string, barcode: string): Promise<O
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ barcode })
   });
-  const data = await res.json();
-  if (!res.ok || !data.success) throw new Error(data.error || "Failed to confirm pickup");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.success) throw await parseApiError(res, "Failed to confirm pickup", data);
   return data.order;
 }
 
@@ -307,15 +381,15 @@ export async function confirmDelivery(orderId: string, code: string): Promise<Or
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ code })
   });
-  const data = await res.json();
-  if (!res.ok || !data.success) throw new Error(data.error || "Failed to confirm delivery");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.success) throw await parseApiError(res, "Failed to confirm delivery", data);
   return data.order;
 }
 
 // ── Rider APIs ──────────────────────────────────────────────────────────────
 export async function getRiderProfile(riderId = getActiveUserId("user_courier")): Promise<any> {
   const res = await fetch(`${API_BASE_URL}/rider/profile?riderId=${riderId}`);
-  if (!res.ok) throw new Error("Failed to fetch rider profile");
+  if (!res.ok) throw await parseApiError(res, "Failed to fetch rider profile");
   const data = await res.json();
   return data.rider;
 }
@@ -326,14 +400,14 @@ export async function toggleRiderStatus(riderId = getActiveUserId("user_courier"
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ riderId, isOnline })
   });
-  if (!res.ok) throw new Error("Failed to toggle rider status");
+  if (!res.ok) throw await parseApiError(res, "Failed to toggle rider status");
   const data = await res.json();
   return data.rider;
 }
 
 export async function getRiderJobs(riderId = getActiveUserId("user_courier")): Promise<OrderData[]> {
   const res = await fetch(`${API_BASE_URL}/rider/jobs?riderId=${riderId}`);
-  if (!res.ok) throw new Error("Failed to fetch rider jobs");
+  if (!res.ok) throw await parseApiError(res, "Failed to fetch rider jobs");
   const data = await res.json();
   return data.jobs || [];
 }
@@ -341,7 +415,7 @@ export async function getRiderJobs(riderId = getActiveUserId("user_courier")): P
 // ── Admin APIs ──────────────────────────────────────────────────────────────
 export async function getAdminDashboard(): Promise<any> {
   const res = await fetch(`${API_BASE_URL}/admin/dashboard`);
-  if (!res.ok) throw new Error("Failed to fetch admin dashboard");
+  if (!res.ok) throw await parseApiError(res, "Failed to fetch admin dashboard");
   const data = await res.json();
   return data.stats;
 }
@@ -349,14 +423,14 @@ export async function getAdminDashboard(): Promise<any> {
 // ── Customer Profile & Recommendations ──────────────────────────────────────
 export async function getCustomerProfile(userId = getActiveUserId("user_customer")): Promise<any> {
   const res = await fetch(`${API_BASE_URL}/customer/profile?userId=${userId}`);
-  if (!res.ok) throw new Error("Failed to fetch profile");
+  if (!res.ok) throw await parseApiError(res, "Failed to fetch profile");
   const data = await res.json();
   return data.profile;
 }
 
 export async function getRecommendations(): Promise<any> {
   const res = await fetch(`${API_BASE_URL}/recommendations`);
-  if (!res.ok) throw new Error("Failed to fetch recommendations");
+  if (!res.ok) throw await parseApiError(res, "Failed to fetch recommendations");
   const data = await res.json();
   return data.recommendations;
 }
@@ -368,8 +442,7 @@ export async function loginUser(email: string, password: string): Promise<any> {
     body: JSON.stringify({ email, password })
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || 'Failed to login');
+    throw await parseApiError(res, 'Failed to login');
   }
   return res.json();
 }
@@ -403,8 +476,7 @@ export async function registerUser(payload: RegisterUserPayload | string, email?
     body: JSON.stringify(bodyData)
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || 'Failed to register');
+    throw await parseApiError(res, 'Failed to register');
   }
   return res.json();
 }
@@ -422,8 +494,7 @@ export async function oauthLogin(name: string, email: string, provider = "GOOGLE
     })
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || 'Failed to authenticate via OAuth');
+    throw await parseApiError(res, 'Failed to authenticate via OAuth');
   }
   return res.json();
 }
