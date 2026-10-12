@@ -206,12 +206,23 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="text-center text-xs text-slate-400 pt-1">
-            Don't have an enterprise or customer account?{" "}
-            <Link href="/register" className="text-orange-400 hover:text-orange-300 font-bold underline decoration-orange-400/30 underline-offset-2">
-              Sign up
-            </Link>
-          </p>
+          <div className="pt-3 border-t border-slate-900 space-y-2.5 text-center">
+            <p className="text-xs text-slate-400">
+              New customer?{" "}
+              <Link href="/register" className="text-orange-400 hover:text-orange-300 font-bold underline decoration-orange-400/30 underline-offset-2">
+                Create Customer Account
+              </Link>
+            </p>
+            <div className="flex items-center justify-center gap-4 text-[11px] text-slate-500">
+              <Link href="/register/restaurant" className="hover:text-orange-400 transition">
+                👨‍🍳 Partner Restaurant Signup
+              </Link>
+              <span>•</span>
+              <Link href="/register/courier" className="hover:text-cyan-400 transition">
+                🚴 Courier Fleet Signup
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 

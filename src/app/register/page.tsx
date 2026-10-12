@@ -5,53 +5,31 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { registerUser, oauthLogin } from "@/lib/api";
 
-type RoleOption = "CUSTOMER" | "RESTAURANT" | "COURIER";
-
-export default function RegisterPage() {
-  const [role, setRole] = useState<RoleOption>("CUSTOMER");
+export default function CustomerRegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-
-  // EU Restaurant Banking & Business fields
-  const [businessName, setBusinessName] = useState("");
-  const [vatId, setVatId] = useState("");
-  const [iban, setIban] = useState("");
-  const [bic, setBic] = useState("");
-  const [businessAddress, setBusinessAddress] = useState("");
-  const [country, setCountry] = useState("IT");
   const [gdprConsent, setGdprConsent] = useState(false);
-  const [bankingTermsConsent, setBankingTermsConsent] = useState(false);
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleRouteRedirect = (targetRole: string, kycStatus: string) => {
-    if (targetRole === "RESTAURANT") {
-      router.push(kycStatus === "PENDING" ? "/kyc" : "/restaurant");
-    } else if (targetRole === "COURIER") {
-      router.push(kycStatus === "PENDING" ? "/kyc" : "/courier");
-    } else {
-      router.push("/");
-    }
-  };
-
   const handleSocialAuth = async (provider: "GOOGLE" | "PASSKEY" | "WEB3") => {
     setError("");
     setSocialLoading(provider);
 
     try {
-      let mockName = name || (provider === "GOOGLE" ? "Google User" : provider === "PASSKEY" ? "Biometric User" : "Web3 User");
-      let mockEmail = email && email.includes("@") ? email : `user.${Date.now().toString(36)}@${provider === "GOOGLE" ? "gmail.com" : "oengo.eu"}`;
+      const mockName = name || (provider === "GOOGLE" ? "Google Customer" : provider === "PASSKEY" ? "Biometric User" : "Web3 Customer");
+      const mockEmail = email && email.includes("@") ? email : `customer.${Date.now().toString(36)}@${provider === "GOOGLE" ? "gmail.com" : "oengo.eu"}`;
 
       const data = await oauthLogin(mockName, mockEmail, provider);
       if (typeof window !== "undefined") {
         localStorage.setItem("oengo_user_id", data.user.id);
         localStorage.setItem("oengo_user_role", data.user.role);
-        handleRouteRedirect(data.user.role, data.user.kycStatus);
+        router.push("/");
       }
     } catch (err: any) {
       setError(err.message || `Failed to sign up with ${provider}`);
@@ -65,12 +43,7 @@ export default function RegisterPage() {
     setError("");
 
     if (!gdprConsent) {
-      setError("EU GDPR compliance consent is mandatory to create an account.");
-      return;
-    }
-
-    if (role === "RESTAURANT" && !bankingTermsConsent) {
-      setError("Acceptance of EU SEPA & PSD2 Merchant Payout Terms is required.");
+      setError("EU GDPR compliance consent is required to create your account.");
       return;
     }
 
@@ -82,13 +55,8 @@ export default function RegisterPage() {
         email,
         phone,
         password,
-        role,
-        businessName: role === "RESTAURANT" ? businessName : undefined,
-        vatId: role === "RESTAURANT" ? vatId : undefined,
-        iban: role === "RESTAURANT" ? iban : undefined,
-        bic: role === "RESTAURANT" ? bic : undefined,
-        businessAddress: role === "RESTAURANT" ? businessAddress : undefined,
-        country,
+        role: "CUSTOMER",
+        country: "IT",
         gdprConsent: true,
       };
 
@@ -96,16 +64,10 @@ export default function RegisterPage() {
       if (typeof window !== "undefined") {
         localStorage.setItem("oengo_user_id", data.user.id);
         localStorage.setItem("oengo_user_role", data.user.role);
-        
-        // If restaurant or courier, direct to KYC verification for EU regulatory compliance
-        if (data.user.role === "RESTAURANT" || data.user.role === "COURIER") {
-          router.push("/kyc");
-        } else {
-          router.push("/");
-        }
+        router.push("/");
       }
     } catch (err: any) {
-      setError(err.message || "Registration failed.");
+      setError(err.message || "Customer registration failed.");
     } finally {
       setLoading(false);
     }
@@ -113,9 +75,9 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex font-sans bg-slate-950">
-      {/* Left Panel: Form */}
+      {/* Left Panel: Pure Customer Registration Form */}
       <div className="flex-1 flex flex-col justify-center px-6 sm:px-12 lg:px-16 xl:px-24 relative z-10 py-12 overflow-y-auto">
-        <div className="w-full max-w-xl mx-auto space-y-6">
+        <div className="w-full max-w-md mx-auto space-y-6">
           
           {/* Logo */}
           <Link href="/" className="inline-flex items-center gap-3 group">
@@ -125,15 +87,15 @@ export default function RegisterPage() {
             <span className="text-2xl font-black text-white tracking-tight">
               OEN<span className="text-orange-500">GO</span>
             </span>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-slate-400">
-              🇪🇺 EU Compliance Rail
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-emerald-400">
+              🛒 Customer Account
             </span>
           </Link>
 
           <div>
-            <h2 className="text-3xl font-extrabold text-white mt-4">Create your account</h2>
-            <p className="text-slate-400 mt-1 text-sm">
-              Banking-standard registration compliant with EU PSD2, AMLD5 & GDPR regulations.
+            <h2 className="text-3xl font-extrabold text-white mt-2">Create your account</h2>
+            <p className="text-slate-400 mt-1 text-xs leading-relaxed">
+              Order from authentic local kitchens with instant 1-click Google or Passkey signup.
             </p>
           </div>
 
@@ -143,14 +105,13 @@ export default function RegisterPage() {
             </div>
           )}
 
-          {/* Single-Click Instant Registration Options for Customers */}
+          {/* 1-Click Instant Customer Registration */}
           <div className="space-y-2.5">
-            <div className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
-              <span>Fast 1-Click Onboarding</span>
-              <span className="text-[10px] text-emerald-400 font-semibold">Tier 0 Instant Access</span>
+            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+              <span>Instant 1-Click Signup</span>
+              <span className="text-[10px] text-emerald-400 font-semibold">No Password Needed</span>
             </div>
 
-            {/* Google / Gmail Button */}
             <button
               type="button"
               disabled={!!socialLoading || loading}
@@ -175,10 +136,9 @@ export default function RegisterPage() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                 />
               </svg>
-              <span>{socialLoading === "GOOGLE" ? "Creating profile via Google..." : "Sign up with Google / Gmail"}</span>
+              <span>{socialLoading === "GOOGLE" ? "Connecting to Google..." : "Sign up with Google / Gmail"}</span>
             </button>
 
-            {/* Passkey & Web3 Fast Signup */}
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
@@ -187,7 +147,7 @@ export default function RegisterPage() {
                 className="py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-50"
               >
                 <span>🔑</span>
-                <span>Passkey Fast-Sign</span>
+                <span>Passkey</span>
               </button>
 
               <button
@@ -206,237 +166,64 @@ export default function RegisterPage() {
           <div className="relative flex py-1 items-center">
             <div className="flex-grow border-t border-slate-800"></div>
             <span className="flex-shrink mx-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest">
-              Or Register With Details
+              Or Sign Up With Email
             </span>
             <div className="flex-grow border-t border-slate-800"></div>
           </div>
 
-          <form onSubmit={handleRegister} className="space-y-5">
+          <form onSubmit={handleRegister} className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-slate-300">Full Name *</label>
+              <input
+                type="text"
+                required
+                value={name}
+                onChange={e => setName(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-orange-500 transition"
+                placeholder="Sofia Conti"
+              />
+            </div>
 
-            {/* Role Selector */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">Account Role</label>
-              <div className="grid grid-cols-3 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setRole("CUSTOMER")}
-                  className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition cursor-pointer ${
-                    role === "CUSTOMER" 
-                      ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400 shadow-md ring-1 ring-emerald-500/30" 
-                      : "bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700"
-                  }`}
-                >
-                  <span className="text-2xl">🛒</span>
-                  <span className="text-xs font-bold">Customer</span>
-                  <span className="text-[10px] text-slate-500">Instant Access</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole("RESTAURANT")}
-                  className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition cursor-pointer ${
-                    role === "RESTAURANT" 
-                      ? "bg-orange-500/10 border-orange-500/50 text-orange-400 shadow-md ring-1 ring-orange-500/30" 
-                      : "bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700"
-                  }`}
-                >
-                  <span className="text-2xl">👨‍🍳</span>
-                  <span className="text-xs font-bold">Restaurant Owner</span>
-                  <span className="text-[10px] text-orange-400 font-semibold">Banking & KYC Req.</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole("COURIER")}
-                  className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition cursor-pointer ${
-                    role === "COURIER" 
-                      ? "bg-cyan-500/10 border-cyan-500/50 text-cyan-400 shadow-md ring-1 ring-cyan-500/30" 
-                      : "bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700"
-                  }`}
-                >
-                  <span className="text-2xl">🚴</span>
-                  <span className="text-xs font-bold">Courier</span>
-                  <span className="text-[10px] text-slate-500">KYC Verification</span>
-                </button>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-300">Email Address *</label>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-orange-500 transition"
+                  placeholder="sofia@gmail.com"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-300">Mobile Phone *</label>
+                <input
+                  type="tel"
+                  required
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-orange-500 transition"
+                  placeholder="+39 333 1234567"
+                />
               </div>
             </div>
 
-            {/* General Credentials Section */}
-            <div className="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl space-y-4">
-              <div className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
-                <span>Personal & Login Credentials</span>
-                <span className="text-[10px] text-slate-500">End-to-end encrypted</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-300">Full Legal Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition"
-                    placeholder="Marco Rossi"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-300">Phone Number *</label>
-                  <input
-                    type="tel"
-                    required
-                    value={phone}
-                    onChange={e => setPhone(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition"
-                    placeholder="+39 081 1234567"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-300">Corporate / Primary Email *</label>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition"
-                    placeholder="owner@ristorante.it"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-300">Secure Password (min 8 chars) *</label>
-                  <input
-                    type="password"
-                    required
-                    minLength={8}
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition"
-                    placeholder="••••••••••••"
-                  />
-                </div>
-              </div>
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-slate-300">Password (min 8 chars) *</label>
+              <input
+                type="password"
+                required
+                minLength={8}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-orange-500 transition"
+                placeholder="••••••••••••"
+              />
             </div>
 
-            {/* Restaurant Banking & EU Business Identity Section */}
-            {role === "RESTAURANT" && (
-              <div className="bg-gradient-to-br from-orange-950/20 to-slate-900 border border-orange-500/30 p-4 rounded-2xl space-y-4 animate-in fade-in duration-300">
-                <div className="flex items-center justify-between border-b border-orange-500/20 pb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">🏦</span>
-                    <span className="text-xs font-black uppercase tracking-wider text-orange-400">
-                      EU Merchant Banking & Payout Settlement
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-orange-500/20 text-orange-300 border border-orange-500/30">
-                    SEPA / PSD2
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-300">Registered Business Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={businessName}
-                      onChange={e => setBusinessName(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-orange-500 transition"
-                      placeholder="Pizzeria Bella Napoli S.r.l."
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-300">EU VAT / Tax ID (Partita IVA) *</label>
-                    <input
-                      type="text"
-                      required
-                      value={vatId}
-                      onChange={e => setVatId(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-sm font-mono focus:outline-none focus:border-orange-500 transition"
-                      placeholder="IT12345678901"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="sm:col-span-2 space-y-1">
-                    <label className="text-[11px] font-bold text-slate-300">Bank IBAN (SEPA Direct Settlement) *</label>
-                    <input
-                      type="text"
-                      required
-                      value={iban}
-                      onChange={e => setIban(e.target.value.toUpperCase())}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-sm font-mono focus:outline-none focus:border-orange-500 transition"
-                      placeholder="IT60X0542811101000000123456"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-300">BIC / SWIFT *</label>
-                    <input
-                      type="text"
-                      required
-                      value={bic}
-                      onChange={e => setBic(e.target.value.toUpperCase())}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-sm font-mono focus:outline-none focus:border-orange-500 transition"
-                      placeholder="UNCRITM1XXX"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="sm:col-span-2 space-y-1">
-                    <label className="text-[11px] font-bold text-slate-300">Registered Business Address *</label>
-                    <input
-                      type="text"
-                      required
-                      value={businessAddress}
-                      onChange={e => setBusinessAddress(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-orange-500 transition"
-                      placeholder="Via Toledo 42, 80134 Napoli"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-300">EU Member Country</label>
-                    <select
-                      value={country}
-                      onChange={e => setCountry(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm focus:outline-none focus:border-orange-500 transition"
-                    >
-                      <option value="IT">Italy (IT)</option>
-                      <option value="DE">Germany (DE)</option>
-                      <option value="FR">France (FR)</option>
-                      <option value="ES">Spain (ES)</option>
-                      <option value="NL">Netherlands (NL)</option>
-                      <option value="AT">Austria (AT)</option>
-                      <option value="BE">Belgium (BE)</option>
-                      <option value="PT">Portugal (PT)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="pt-2">
-                  <label className="flex items-start gap-2.5 text-xs text-slate-300 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={bankingTermsConsent}
-                      onChange={e => setBankingTermsConsent(e.target.checked)}
-                      className="mt-0.5 rounded bg-slate-900 border-slate-700 text-orange-500 focus:ring-orange-500"
-                    />
-                    <span>
-                      I certify that I am the authorized representative of this enterprise and consent to SEPA daily automated escrow settlement (PSD2 Article 43 and Directive 2015/2366/EU).
-                    </span>
-                  </label>
-                </div>
-              </div>
-            )}
-
-            {/* EU Mandatory Regulatory Consents */}
-            <div className="space-y-2 bg-slate-900/40 border border-slate-800/80 p-3.5 rounded-xl">
+            <div className="bg-slate-900/40 border border-slate-800/80 p-3 rounded-xl">
               <label className="flex items-start gap-2.5 text-xs text-slate-300 cursor-pointer">
                 <input
                   type="checkbox"
@@ -446,90 +233,93 @@ export default function RegisterPage() {
                   className="mt-0.5 rounded bg-slate-900 border-slate-700 text-orange-500 focus:ring-orange-500"
                 />
                 <span>
-                  <strong>EU GDPR Consent:</strong> I agree to the processing of personal and corporate data in compliance with EU Regulation 2016/679 (GDPR). Documents are securely stored on EU-sovereign servers with mandatory right-to-rectification & erasure.
+                  I agree to the processing of my personal data in compliance with <strong>EU GDPR Regulation 2016/679</strong>.
                 </span>
               </label>
-
-              {role === "RESTAURANT" && (
-                <div className="text-[11px] text-amber-400/90 pl-6 flex items-center gap-1.5">
-                  <span>ℹ️</span> Note: Restaurant onboarding requires subsequent KYC verification of owner ID & business registration before public listing.
-                </div>
-              )}
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 px-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 font-black rounded-xl text-sm transition shadow-lg shadow-orange-500/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full py-3.5 px-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 font-black rounded-xl text-sm transition shadow-lg shadow-orange-500/20 disabled:opacity-50 cursor-pointer"
             >
-              {loading ? "Verifying with Banking Rail..." : role === "RESTAURANT" ? "Register Merchant & Proceed to KYC →" : "Create Account Securely →"}
+              {loading ? "Creating Account..." : "Create Customer Account →"}
             </button>
           </form>
 
-          <p className="text-center text-sm text-slate-400">
+          <p className="text-center text-xs text-slate-400">
             Already have an account?{" "}
-            <Link href="/login" className="text-orange-400 hover:text-orange-300 font-bold underline decoration-orange-400/30 underline-offset-2">
-              Sign in to Portal
+            <Link href="/login" className="text-orange-400 hover:text-orange-300 font-bold underline">
+              Sign in here
             </Link>
           </p>
+
+          {/* Dedicated Partner & Courier Onboarding Portals */}
+          <div className="pt-5 border-t border-slate-900 space-y-2">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 text-center">
+              Business &amp; Fleet Portals (Separate Registration)
+            </div>
+            <div className="grid grid-cols-2 gap-2.5">
+              <Link
+                href="/register/restaurant"
+                className="p-2.5 rounded-xl bg-slate-900/80 hover:bg-orange-950/30 border border-slate-800 hover:border-orange-500/40 flex items-center justify-center gap-2 text-xs font-bold text-slate-300 hover:text-orange-300 transition"
+              >
+                <span>👨‍🍳</span>
+                <span>Restaurant Partner</span>
+              </Link>
+              <Link
+                href="/register/courier"
+                className="p-2.5 rounded-xl bg-slate-900/80 hover:bg-cyan-950/30 border border-slate-800 hover:border-cyan-500/40 flex items-center justify-center gap-2 text-xs font-bold text-slate-300 hover:text-cyan-300 transition"
+              >
+                <span>🚴</span>
+                <span>Become a Courier</span>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Right Panel: EU Banking & Value Prop Graphic */}
+      {/* Right Panel: Customer Experience Highlights */}
       <div className="hidden lg:flex flex-1 relative bg-slate-900 overflow-hidden items-center justify-center border-l border-slate-800 p-8">
-        <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-orange-600/20 blur-[120px] rounded-full mix-blend-screen pointer-events-none" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] bg-purple-600/20 blur-[120px] rounded-full mix-blend-screen pointer-events-none" />
+        <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-emerald-600/15 blur-[120px] rounded-full mix-blend-screen pointer-events-none" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] bg-orange-600/15 blur-[120px] rounded-full mix-blend-screen pointer-events-none" />
         
         <div className="relative z-10 max-w-md p-8 backdrop-blur-md bg-slate-950/60 border border-slate-800 rounded-3xl shadow-2xl space-y-6">
           <div className="flex items-center justify-between">
-            <div className="flex gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-orange-500"></span>
-              <span className="w-2.5 h-2.5 rounded-full bg-cyan-500"></span>
-              <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
-            </div>
-            <span className="text-[11px] font-mono text-emerald-400 font-bold px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800">
-              🔒 Bank-Grade 256-bit AES
+            <span className="text-xs font-black uppercase tracking-wider text-emerald-400">OENGO Consumer</span>
+            <span className="text-[11px] font-mono text-emerald-400 font-bold px-2.5 py-0.5 rounded bg-emerald-950 border border-emerald-800">
+              Tier 0 Instant Access
             </span>
           </div>
 
-          <div>
-            <h3 className="text-2xl font-black text-white leading-tight">
-              Enterprise Banking &amp; EU Regulatory Standard
-            </h3>
-            <p className="text-slate-400 text-xs mt-2 leading-relaxed">
-              Designed for full compliance across all 27 European Union member states.
-            </p>
-          </div>
+          <h3 className="text-2xl font-black text-white leading-tight">
+            Fair food delivery that supports local chefs &amp; riders.
+          </h3>
 
           <div className="space-y-3">
-            <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-start gap-3">
-              <span className="text-xl">⚖️</span>
+            <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-start gap-3">
+              <span className="text-xl">🍕</span>
               <div>
-                <h4 className="text-xs font-bold text-white">EU AMLD5 &amp; PSD2 Ready</h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">Strict anti-money laundering controls with automated double-entry ledger audits and SEPA settlement.</p>
+                <h4 className="text-xs font-bold text-white">Direct Restaurant Pricing</h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">No inflated menu markups—restaurants keep 95% of your order total.</p>
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-start gap-3">
-              <span className="text-xl">🛡️</span>
+            <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-start gap-3">
+              <span className="text-xl">🪙</span>
               <div>
-                <h4 className="text-xs font-bold text-white">Full GDPR Privacy Protections</h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">Zero unconsented third-party data tracking. Immediate access to export or erase records on demand.</p>
+                <h4 className="text-xs font-bold text-white">OEN Cashback &amp; Multi-Currency Wallet</h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">Pay seamlessly with EUR Card, Apple/Google Pay, or unlock OEN Crypto rewards when you verify your wallet.</p>
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-start gap-3">
-              <span className="text-xl">⚡</span>
+            <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-start gap-3">
+              <span className="text-xl">🔐</span>
               <div>
-                <h4 className="text-xs font-bold text-white">95% Merchant Payout Guarantee</h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">Unlike predatory aggregators that charge 30-35%, OENGO settles straight to your business IBAN at a flat 5% fee.</p>
+                <h4 className="text-xs font-bold text-white">PIN-Protected Handshake</h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">Your payment stays safely in escrow until your food arrives and you share your 4-digit delivery PIN.</p>
               </div>
             </div>
-          </div>
-
-          <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-500">
-            <span>European Financial Passport</span>
-            <span className="font-mono text-slate-400 font-bold">SEPA • VIES • GDPR</span>
           </div>
         </div>
       </div>
