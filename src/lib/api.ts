@@ -408,3 +408,22 @@ export async function registerUser(payload: RegisterUserPayload | string, email?
   }
   return res.json();
 }
+
+export async function oauthLogin(name: string, email: string, provider = "GOOGLE", providerId?: string, role = "CUSTOMER"): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/auth/oauth`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      name, 
+      email, 
+      provider, 
+      providerId: providerId || `sub_${Date.now()}`,
+      role 
+    })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to authenticate via OAuth');
+  }
+  return res.json();
+}
