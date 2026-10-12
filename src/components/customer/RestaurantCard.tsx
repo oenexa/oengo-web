@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Restaurant, MenuItem } from "@/types";
 import { formatEUR } from "@/lib/utils";
 import { getRestaurantMenu } from "@/lib/api";
-import { DishCard } from "./DishCard";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -24,6 +24,7 @@ export function RestaurantCard({
   const [isExpanded, setIsExpanded] = useState(false);
   const [menu, setMenu] = useState<MenuItem[]>([]);
   const [loadingMenu, setLoadingMenu] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (isSelected && !isExpanded) {
@@ -70,7 +71,7 @@ export function RestaurantCard({
               <span>⭐</span> {restaurant.rating} ({restaurant.reviewCount})
             </span>
             <span className="text-[10px] font-mono text-orange-400/90 bg-orange-950/40 px-2 py-0.5 rounded border border-orange-900/40">
-              95% Payout
+              {t("directory.payoutGuaranteed", "95% Payout")}
             </span>
           </div>
         </div>
@@ -103,7 +104,7 @@ export function RestaurantCard({
               : "bg-slate-950/80 hover:bg-slate-800 text-orange-400 border border-orange-500/20 hover:border-orange-500/40"
           }`}
         >
-          <span>{isExpanded ? "📖 Close Interactive Menu" : "⚡ Open Menu Frame"}</span>
+          <span>{isExpanded ? t("directory.closeMenu", "📖 Close Interactive Menu") : t("directory.openMenu", "⚡ Open Menu Frame")}</span>
           <span className={`text-[10px] transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`}>
             ▼
           </span>
@@ -121,21 +122,21 @@ export function RestaurantCard({
         <div className="p-4 space-y-3">
           <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
             <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
-              Interactive Menu Frame
+              {t("directory.openMenu", "Interactive Menu Frame")}
             </span>
             <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/50">
-              Live Kitchen Sync
+              {t("directory.liveSync", "Live Kitchen Sync")}
             </span>
           </div>
 
           {loadingMenu ? (
             <div className="py-8 flex flex-col items-center justify-center gap-2 text-slate-400 text-xs">
               <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-              <span>Loading kitchen specialties...</span>
+              <span>{t("directory.loadingDishes", "Loading kitchen specialties...")}</span>
             </div>
           ) : menu.length === 0 ? (
             <div className="py-6 text-center text-xs text-slate-500">
-              Click on the restaurant to load active menu items.
+              {t("directory.noDishes", "Click on the restaurant to load active menu items.")}
             </div>
           ) : (
             <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
@@ -197,7 +198,7 @@ export function RestaurantCard({
                         disabled={!item.inStock}
                         className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-slate-950 font-black rounded-xl text-xs transition shadow-sm cursor-pointer"
                       >
-                        {item.inStock ? "Add +" : "Sold Out"}
+                        {item.inStock ? t("directory.addToCart", "Add +") : t("directory.soldOut", "Sold Out")}
                       </button>
                     )}
                   </div>
