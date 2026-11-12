@@ -32,10 +32,10 @@ export function WalletBadge({ wallet, onOpenKYC, isKYCVerified = false }: Wallet
         <div className="text-[10px] text-slate-400">⭐ {wallet.digital.loyaltyPoints} Pts</div>
       </div>
 
-      {/* Crypto OEN Token Section with KYC Lock Indicator */}
+      {/* Crypto ONXC Token Section with KYC Lock Indicator */}
       <div className="pl-1">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Web3 (OEN)</span>
+          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Web3 (ONXC)</span>
           {!isKYCVerified && onOpenKYC && (
             <button
               onClick={onOpenKYC}
@@ -47,7 +47,7 @@ export function WalletBadge({ wallet, onOpenKYC, isKYCVerified = false }: Wallet
           )}
         </div>
         <div className="text-base font-black text-amber-400">
-          {parseFloat(wallet.crypto.balanceOEN).toFixed(2)} OEN
+          {parseFloat(wallet.crypto.balanceONXC).toFixed(2)} ONXC
         </div>
         <div className="text-[10px] font-mono text-slate-500 truncate max-w-[110px]">
           {truncateAddress(wallet.crypto.address)}

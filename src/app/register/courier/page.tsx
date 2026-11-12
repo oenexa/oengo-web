@@ -89,7 +89,7 @@ export default function CourierRegisterPage() {
             </div>
             <h2 className="text-3xl font-extrabold text-white">Ride with OENGO</h2>
             <p className="text-slate-400 mt-1 text-sm">
-              Earn 100% of delivery fees and customer tips with instant EUR &amp; OEN wallet payouts after every drop-off.
+              Earn 100% of delivery fees and customer tips with instant EUR &amp; ONXC wallet payouts after every drop-off.
             </p>
           </div>
 
@@ -324,8 +324,8 @@ export default function CourierRegisterPage() {
             <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-start gap-3">
               <span className="text-xl">🌱</span>
               <div>
-                <h4 className="text-xs font-bold text-white">Green Fleet OEN Rewards</h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">Earn bonus OEN governance tokens when completing deliveries on E-Bikes or zero-emission EVs.</p>
+                <h4 className="text-xs font-bold text-white">Green Fleet ONXC Rewards</h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">Earn bonus ONXC governance tokens when completing deliveries on E-Bikes or zero-emission EVs.</p>
               </div>
             </div>
           </div>

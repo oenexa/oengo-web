@@ -208,7 +208,7 @@ export async function getRestaurantMenu(restaurantId: string): Promise<MenuItem[
 
 export async function addDish(
   restaurantId: string, 
-  dishData: Omit<MenuItem, "id" | "priceOEN">
+  dishData: Omit<MenuItem, "id" | "priceONXC">
 ): Promise<MenuItem> {
   const res = await fetch(`${API_BASE_URL}/restaurants/${restaurantId}/menu`, {
     method: "POST",

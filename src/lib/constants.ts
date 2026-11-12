@@ -2,7 +2,7 @@ export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhos
   ? (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001").replace(/\/+$/, "")
   : `${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001").replace(/\/+$/, "")}/api`;
 
-export const OEN_EUR_EXCHANGE_RATE = 13.60;
+export const ONXC_EUR_EXCHANGE_RATE = 13.60;
 
 export const DEFAULT_COMMISSION_PCT = 5;
 

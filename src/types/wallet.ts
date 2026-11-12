@@ -7,7 +7,7 @@ export interface DigitalWallet {
 
 export interface CryptoWallet {
   address: string;
-  balanceOEN: string;
+  balanceONXC: string;
   type: string;
 }
 

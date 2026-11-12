@@ -1,6 +1,16 @@
 @import "tailwindcss";
 
 :root {
+  --ox-bg-canvas: #0b0e14;
+  --ox-bg-surface: #151922;
+  --ox-bg-elevated: #1f2533;
+  --ox-border-subtle: #232b3b;
+  --ox-text-primary: #f0f3f6;
+  --ox-text-secondary: #8c9ba8;
+  --ox-text-muted: #5a6878;
+  --ox-accent-primary: #f0b90b;
+  --ox-accent-positive: #10b981;
+  --ox-accent-danger: #ef4444;
   --background: #ffffff;
   --foreground: #171717;
 }

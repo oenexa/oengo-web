@@ -60,7 +60,7 @@ export function MenuManager({
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <div className="text-lg font-black text-emerald-400">{formatEUR(item.priceEUR)}</div>
-                  <div className="text-[10px] text-slate-500 font-mono">{item.priceOEN} OEN</div>
+                  <div className="text-[10px] text-slate-500 font-mono">{item.priceONXC} ONXC</div>
                 </div>
 
                 {/* Live In-Stock Toggle */}

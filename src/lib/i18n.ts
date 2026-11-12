@@ -89,7 +89,7 @@ export const translations: Record<SupportedLocale, Record<string, string>> = {
     "hero.badge": "🚀 Consegna a Zero Commissioni Nascoste",
     "hero.title1": "Hai fame?",
     "hero.title2": "OENGO e gusta.",
-    "hero.subtitle": "Ordina dai migliori ristoranti locali con escrow crittografici sicuri e pagamento diretto in Euro o OEN.",
+    "hero.subtitle": "Ordina dai migliori ristoranti locali con escrow crittografici sicuri e pagamento diretto in Euro o ONXC.",
 
     // Directory
     "directory.featured": "Ristoranti Partner Esclusivi (Menu Interattivi)",

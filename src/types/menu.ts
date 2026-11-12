@@ -21,7 +21,7 @@ export interface MenuItem {
   name: string;
   description: string;
   priceEUR: number;
-  priceOEN: string;
+  priceONXC: string;
   inStock: boolean;
   stockQuantity?: number;
   lowStockThreshold?: number;

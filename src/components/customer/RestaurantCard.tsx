@@ -164,7 +164,7 @@ export function RestaurantCard({
                         {formatEUR(item.priceEUR)}
                       </span>
                       <span className="text-[10px] text-slate-500 font-mono">
-                        {item.priceOEN} OEN
+                        {item.priceONXC} ONXC
                       </span>
                     </div>
                   </div>

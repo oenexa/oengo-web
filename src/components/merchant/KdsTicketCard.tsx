@@ -75,7 +75,7 @@ export function KdsTicketCard({
             ) : (
               <>
                 <span>⚡</span>
-                <span>Web3 Crypto (OEN L1 Escrow)</span>
+                <span>Web3 Crypto (ONXC L1 Escrow)</span>
               </>
             )}
             <span className="text-emerald-400 font-bold ml-1">PAID</span>

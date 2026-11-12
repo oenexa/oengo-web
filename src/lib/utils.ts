@@ -1,11 +1,11 @@
-import { OEN_EUR_EXCHANGE_RATE } from "./constants";
+import { ONXC_EUR_EXCHANGE_RATE } from "./constants";
 
 export function formatEUR(amount: number): string {
   return `€${amount.toFixed(2)}`;
 }
 
-export function formatOEN(amountEUR: number): string {
-  return `${(amountEUR / OEN_EUR_EXCHANGE_RATE).toFixed(2)} OEN`;
+export function formatONXC(amountEUR: number): string {
+  return `${(amountEUR / ONXC_EUR_EXCHANGE_RATE).toFixed(2)} ONXC`;
 }
 
 export function detectCardBrand(number: string): string {

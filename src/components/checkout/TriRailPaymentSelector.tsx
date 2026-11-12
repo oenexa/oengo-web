@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { PaymentMethodOption, WalletData } from "@/types";
-import { formatEUR, formatOEN } from "@/lib/utils";
+import { formatEUR, formatONXC } from "@/lib/utils";
 import { CardPaymentForm } from "./CardPaymentForm";
 
 interface TriRailPaymentSelectorProps {
@@ -166,14 +166,14 @@ export function TriRailPaymentSelector({
 
         <button
           type="button"
-          onClick={() => onSelectMethod("CRYPTO_OEN")}
+          onClick={() => onSelectMethod("CRYPTO_ONXC")}
           className={`py-1.5 px-1 text-[11px] font-semibold rounded-lg transition cursor-pointer flex items-center justify-center gap-1 ${
-            selectedMethod === "CRYPTO_OEN"
+            selectedMethod === "CRYPTO_ONXC"
               ? "bg-slate-800 text-orange-400 border border-slate-700"
               : "text-slate-400 hover:text-white"
           }`}
         >
-          <span>⚡ OEN L1</span>
+          <span>⚡ ONXC L1</span>
         </button>
       </div>
 
@@ -299,8 +299,8 @@ export function TriRailPaymentSelector({
         </div>
       )}
 
-      {/* Crypto OEN */}
-      {selectedMethod === "CRYPTO_OEN" && (
+      {/* Crypto ONXC */}
+      {selectedMethod === "CRYPTO_ONXC" && (
         <div className="space-y-3 pt-1">
           <div className="p-3 bg-slate-900 rounded-xl border border-slate-800 text-xs space-y-1">
             <div className="text-slate-400 flex justify-between">
@@ -308,17 +308,17 @@ export function TriRailPaymentSelector({
               <span className="text-white font-mono text-[10px]">0xAlice_Customer_MLDSA65</span>
             </div>
             <div className="text-slate-400 flex justify-between">
-              <span>OEN Balance:</span>
-              <span className="text-orange-400 font-bold font-mono">{wallet?.crypto.balanceOEN ?? "100.00"} OEN</span>
+              <span>ONXC Balance:</span>
+              <span className="text-orange-400 font-bold font-mono">{wallet?.crypto.balanceONXC ?? "100.00"} ONXC</span>
             </div>
           </div>
           <button
             type="button"
-            onClick={() => onPlaceOrder("CRYPTO_OEN")}
+            onClick={() => onPlaceOrder("CRYPTO_ONXC")}
             disabled={loading || disabled}
             className="w-full py-3 px-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 font-black rounded-xl text-xs transition disabled:opacity-50 shadow-lg shadow-orange-500/10 cursor-pointer"
           >
-            <span>⚡ Pay {formatOEN(orderTotal)} via L1 Post-Quantum Escrow</span>
+            <span>⚡ Pay {formatONXC(orderTotal)} via L1 Post-Quantum Escrow</span>
           </button>
         </div>
       )}

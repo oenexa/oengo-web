@@ -32,7 +32,7 @@ export function DishCard({ dish, onAddToCart, onCustomize }: DishCardProps) {
       <div className="mt-4 pt-3 border-t border-slate-900 flex items-center justify-between">
         <div>
           <span className="text-sm font-black text-emerald-400">{formatEUR(dish.priceEUR)}</span>
-          <span className="text-[10px] text-slate-500 font-mono ml-1.5">{dish.priceOEN} OEN</span>
+          <span className="text-[10px] text-slate-500 font-mono ml-1.5">{dish.priceONXC} ONXC</span>
         </div>
 
         <div className="flex items-center gap-1.5">

@@ -1,5 +1,5 @@
 import { CartItem, PaymentMethodOption, WalletData } from "@/types";
-import { formatEUR, formatOEN } from "@/lib/utils";
+import { formatEUR, formatONXC } from "@/lib/utils";
 import { CommissionSelector } from "../checkout/CommissionSelector";
 import { TriRailPaymentSelector } from "../checkout/TriRailPaymentSelector";
 
@@ -180,7 +180,7 @@ export function CartDrawer({
           <span className="text-orange-400 font-mono">{formatEUR(orderTotal)}</span>
         </div>
         <div className="text-[10px] text-right text-slate-500 font-mono">
-          ≈ {formatOEN(orderTotal)}
+          ≈ {formatONXC(orderTotal)}
         </div>
       </div>
 

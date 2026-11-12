@@ -122,7 +122,7 @@ export default function MerchantPortal() {
     }
   };
 
-  const handleAddDish = async (dishData: Omit<MenuItem, "id" | "priceOEN">) => {
+  const handleAddDish = async (dishData: Omit<MenuItem, "id" | "priceONXC">) => {
     setLoading(true);
     try {
       const newItem = await addDish(RESTAURANT_ID, dishData);

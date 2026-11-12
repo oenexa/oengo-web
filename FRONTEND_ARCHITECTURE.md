@@ -78,7 +78,7 @@ oengo-web/
 * Supports 3 distinct payment options in a single modal:
   1. 💳 **Instant Credit / Debit Card**: Form with real-time brand detection (Visa, Mastercard, Amex), expiry formatting, CVV validation, and tokenized payment intents.
   2. 💶 **In-App Digital Wallet**: 1-click debit from user's preloaded fiat balance or accumulated cashback.
-  3. ⚡ **Web3 Crypto (OEN)**: Non-custodial transaction signed with post-quantum ML-DSA-65 keys.
+  3. ⚡ **Web3 Crypto (ONXC)**: Non-custodial transaction signed with post-quantum ML-DSA-65 keys.
 
 ### B. High-Conversion Customer Storefront
 * **Dynamic Geolocation**: Top bar allowing instant delivery address changes.

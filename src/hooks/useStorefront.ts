@@ -70,7 +70,7 @@ export function useStorefront() {
       // Local fallback
       setWallet({
         digital: { fiatEUR: 50.00, loyaltyPoints: 120, type: "OFF_CHAIN_CREDITS" },
-        crypto: { balanceOEN: "0", address: "0x...", type: "ON_CHAIN_WALLET" }
+        crypto: { balanceONXC: "0", address: "0x...", type: "ON_CHAIN_WALLET" }
       });
     }
   }, []);

@@ -5,7 +5,7 @@ interface AddDishModalProps {
   isOpen: boolean;
   loading: boolean;
   onClose: () => void;
-  onAddDish: (dish: Omit<MenuItem, "id" | "priceOEN">) => void;
+  onAddDish: (dish: Omit<MenuItem, "id" | "priceONXC">) => void;
 }
 
 export function AddDishModal({

@@ -1,5 +1,5 @@
 import { RestaurantProfile } from "@/types";
-import { formatEUR, formatOEN } from "@/lib/utils";
+import { formatEUR, formatONXC } from "@/lib/utils";
 
 interface FinancialRibbonProps {
   profile: RestaurantProfile | null;
@@ -17,7 +17,7 @@ export function FinancialRibbon({ profile, activeCount }: FinancialRibbonProps) 
       <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
         <div className="text-xs uppercase font-bold text-slate-400 tracking-wider">Today&apos;s Revenue</div>
         <div className="text-2xl font-black text-emerald-400 mt-1">{formatEUR(grossRev)}</div>
-        <div className="text-[11px] text-slate-500 mt-0.5">+{formatOEN(grossRev)}</div>
+        <div className="text-[11px] text-slate-500 mt-0.5">+{formatONXC(grossRev)}</div>
       </div>
 
       <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">

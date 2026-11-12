@@ -59,7 +59,7 @@ export default function LoginPage() {
         mockEmail = "passkey.user@oengo.eu";
       } else if (provider === "WEB3") {
         mockName = "0xWallet Holder";
-        mockEmail = "web3.holder@oen.network";
+        mockEmail = "web3.holder@onxc.network";
       }
 
       const data = await oauthLogin(mockName, mockEmail, provider);

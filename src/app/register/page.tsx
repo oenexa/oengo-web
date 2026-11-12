@@ -308,8 +308,8 @@ export default function CustomerRegisterPage() {
             <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-start gap-3">
               <span className="text-xl">🪙</span>
               <div>
-                <h4 className="text-xs font-bold text-white">OEN Cashback &amp; Multi-Currency Wallet</h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">Pay seamlessly with EUR Card, Apple/Google Pay, or unlock OEN Crypto rewards when you verify your wallet.</p>
+                <h4 className="text-xs font-bold text-white">ONXC Cashback &amp; Multi-Currency Wallet</h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">Pay seamlessly with EUR Card, Apple/Google Pay, or unlock ONXC Crypto rewards when you verify your wallet.</p>
               </div>
             </div>
 

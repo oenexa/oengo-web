@@ -61,7 +61,7 @@ export function CustomerKYCModal({ isOpen, onClose, onSuccess }: CustomerKYCModa
               EU AMLD5 &amp; MiCA Compliant
             </span>
             <h3 className="text-lg font-black text-white mt-0.5">
-              Unlock Wallet &amp; OEN Crypto Holdings
+              Unlock Wallet &amp; ONXC Crypto Holdings
             </h3>
           </div>
         </div>
@@ -75,7 +75,7 @@ export function CustomerKYCModal({ isOpen, onClose, onSuccess }: CustomerKYCModa
             <span className="text-3xl block">🎉</span>
             <h4 className="text-sm font-bold text-white">Tier 2 Verification Complete!</h4>
             <p className="text-xs text-emerald-400/90">
-              Your digital wallet and OEN token holdings are now fully unlocked for deposits and P2P payments.
+              Your digital wallet and ONXC token holdings are now fully unlocked for deposits and P2P payments.
             </p>
           </div>
         ) : (
@@ -114,8 +114,8 @@ export function CustomerKYCModal({ isOpen, onClose, onSuccess }: CustomerKYCModa
                       : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700"
                   }`}
                 >
-                  <div className="font-bold text-xs text-white">Tier 2: Full Crypto &amp; OEN</div>
-                  <div className="text-[10px] text-slate-400 mt-1">Unlimited EUR &amp; OEN tokens</div>
+                  <div className="font-bold text-xs text-white">Tier 2: Full Crypto &amp; ONXC</div>
+                  <div className="text-[10px] text-slate-400 mt-1">Unlimited EUR &amp; ONXC tokens</div>
                 </button>
               </div>
             </div>
@@ -160,7 +160,7 @@ export function CustomerKYCModal({ isOpen, onClose, onSuccess }: CustomerKYCModa
               disabled={isUploading}
               className="w-full py-3.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 font-black rounded-xl text-xs transition shadow-lg shadow-orange-500/20 disabled:opacity-50 cursor-pointer"
             >
-              {isUploading ? "Verifying with AML Registry..." : "Unlock Wallet & Activate OEN Holdings →"}
+              {isUploading ? "Verifying with AML Registry..." : "Unlock Wallet & Activate ONXC Holdings →"}
             </button>
           </form>
         )}

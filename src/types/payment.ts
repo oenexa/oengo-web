@@ -8,7 +8,7 @@ export type PaymentMethodOption =
   | "APPLE_PAY"
   | "GOOGLE_PAY"
   | "BANK_TRANSFER"
-  | "CRYPTO_OEN";
+  | "CRYPTO_ONXC";
 
 export interface CardPaymentData {
   transactionId: string;
