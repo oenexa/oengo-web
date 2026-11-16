@@ -1,0 +1,19 @@
+# ==============================================================================
+# OenGo Customer Web Storefront — Standalone Local Stack
+# Usage: docker compose up -d --build
+# ==============================================================================
+
+version: "3.8"
+
+services:
+  oengo-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: oengo-web-standalone
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: "3000"
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+    restart: unless-stopped
